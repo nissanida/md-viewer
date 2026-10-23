@@ -99,6 +99,34 @@ test('shows notices with their tone', () => {
   assert.equal(item.textContent, 'Not logged in')
 })
 
+// jsdom has no layout, so these give the page a scroller with set sizes.
+function withScroller (document, sizes) {
+  const scroller = { scrollTop: 0, ...sizes }
+  Object.defineProperty(document, 'scrollingElement', { value: scroller, configurable: true })
+  return scroller
+}
+
+test('keeps the newest message in view when the panel gets shorter', () => {
+  const { view, document } = setUp()
+  const scroller = withScroller(document, { scrollHeight: 1000, clientHeight: 600, scrollTop: 400 })
+  view.upsert([{ id: 'a1', kind: 'assistant', text: 'Long reply' }], options)
+  scroller.scrollTop = 400 // at the bottom
+  scroller.clientHeight = 547 // a notice appeared under the transcript
+  document.defaultView.dispatchEvent(new document.defaultView.Event('resize'))
+  assert.equal(scroller.scrollTop, 1000)
+})
+
+test('leaves the reader where they scrolled, until they send a message', () => {
+  const { view, document } = setUp()
+  const scroller = withScroller(document, { scrollHeight: 1000, clientHeight: 600, scrollTop: 100 })
+  document.defaultView.dispatchEvent(new document.defaultView.Event('scroll'))
+  view.upsert([{ id: 'a1', kind: 'assistant', text: 'More text' }], options)
+  document.defaultView.dispatchEvent(new document.defaultView.Event('resize'))
+  assert.equal(scroller.scrollTop, 100)
+  view.upsert([{ id: 'u2', kind: 'user', text: 'Next question' }], options)
+  assert.equal(scroller.scrollTop, 1000)
+})
+
 test('starts over empty, with the hint, and shows what Claude is doing', () => {
   const { view, chat, document } = setUp()
   const empty = document.getElementById('empty')

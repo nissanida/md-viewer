@@ -23,13 +23,33 @@
   // Shown after a step that didn't simply finish.
   const STATE_LABELS = { failed: 'failed', denied: 'not allowed', stopped: 'stopped' }
 
+  // The view follows the newest message until the reader scrolls up, and
+  // again once they scroll back down or send a message. Remembered rather
+  // than measured at each update, because the page also gets shorter when a
+  // notice opens under it, which would look like scrolling away.
+  let following = true
+
+  function isAtBottom () {
+    const scroller = document.scrollingElement
+    return !scroller || scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 48
+  }
+
+  function followNewest () {
+    const scroller = document.scrollingElement
+    if (scroller && following) scroller.scrollTop = scroller.scrollHeight
+  }
+
+  const window = document.defaultView
+  if (window) {
+    window.addEventListener('scroll', () => { following = isAtBottom() }, { passive: true })
+    window.addEventListener('resize', followNewest)
+  }
+
   /**
    * Adds new items at the end and replaces changed ones in place.
    * options.baseDir: file URL of the chat's folder, for relative links in replies.
    */
   function upsert (items, options = {}) {
-    const scroller = document.scrollingElement
-    const wasAtBottom = !scroller || scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 48
     let sent = false
     for (const item of items) {
       const element = render(item, options)
@@ -43,14 +63,15 @@
       elements.set(item.id, element)
     }
     empty.hidden = elements.size > 0
-    // Follow the conversation, unless the user scrolled up to read.
-    if (scroller && (wasAtBottom || sent)) scroller.scrollTop = scroller.scrollHeight
+    if (sent) following = true
+    followNewest()
   }
 
   function reset () {
     container.replaceChildren()
     elements.clear()
     empty.hidden = false
+    following = true
     setStatus(null)
   }
 
@@ -58,6 +79,7 @@
   function setStatus (text) {
     status.textContent = text || ''
     status.hidden = !text
+    followNewest()
   }
 
   function render (item, options) {

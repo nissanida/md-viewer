@@ -140,13 +140,27 @@ def answer(text):
     finish("Replied.")
 
 
+# The models a Pro plan listed in Claude Code 2.1.158.
+MODELS = [
+    {"value": "default", "displayName": "Default (recommended)", "description": "Sonnet 4.6 · Best for everyday tasks",
+     "supportsEffort": True, "supportedEffortLevels": ["low", "medium", "high", "max"], "supportsAutoMode": True},
+    {"value": "opus", "displayName": "Opus", "description": "Opus 4.8 · Most capable for complex work",
+     "supportsEffort": True, "supportedEffortLevels": ["low", "medium", "high", "xhigh", "max"], "supportsAutoMode": True},
+    {"value": "haiku", "displayName": "Haiku", "description": "Haiku 4.5 · Fastest for quick answers"},
+]
+
+
 def main():
+    if os.environ.get("FAKE_CLAUDE_LOG"):  # how the app started it, for tests to check
+        with open(os.environ["FAKE_CLAUDE_LOG"], "a", encoding="utf-8") as log:
+            options = [arg for arg in sys.argv[1:] if not arg.startswith("You are running inside")]
+            log.write("STARTED " + " ".join(options) + "\n=====\n")
     while True:
         message = read()
         kind = message.get("type")
         if kind == "control_request":
             subtype = message["request"].get("subtype")
-            response = {"account": {"tokenSource": "fake"}} if subtype == "initialize" else {}
+            response = {"account": {"tokenSource": "fake"}, "models": MODELS} if subtype == "initialize" else {}
             emit({"type": "control_response", "response": {"subtype": "success", "request_id": message["request_id"], "response": response}})
         elif kind == "user":
             content = message["message"]["content"]

@@ -121,6 +121,22 @@ struct ClaudeEventTests {
         #expect(failure == [.requestAnswered(requestID: "stop-2", error: "No query in progress")])
     }
 
+    @Test func readsTheModelsClaudeCodeOffers() {
+        // Trimmed from Claude Code 2.1.158's answer to initialize, signed in with a Pro plan.
+        let events = ClaudeEvent.decode(line(#"{"type":"control_response","response":{"subtype":"success","request_id":"init","response":{"commands":[],"models":[{"value":"default","displayName":"Default (recommended)","description":"Sonnet 4.6 · Best for everyday tasks","supportsEffort":true,"supportedEffortLevels":["low","medium","high","max"],"supportsAdaptiveThinking":true,"supportsAutoMode":true},{"value":"opus","displayName":"Opus","description":"Opus 4.8 · Most capable for complex work · ~2× usage vs Sonnet","supportsEffort":true,"supportedEffortLevels":["low","medium","high","xhigh","max"],"supportsAdaptiveThinking":true,"supportsFastMode":true,"supportsAutoMode":true},{"value":"haiku","displayName":"Haiku","description":"Haiku 4.5 · Fastest for quick answers"}],"account":{"subscriptionType":"Claude Pro"},"pid":51234}}}"#))
+        #expect(events == [
+            .requestAnswered(requestID: "init", error: nil),
+            .modelsAvailable([
+                ClaudeModel(value: "default", displayName: "Default (recommended)", description: "Sonnet 4.6 · Best for everyday tasks",
+                            effortLevels: ["low", "medium", "high", "max"], supportsAutoMode: true),
+                ClaudeModel(value: "opus", displayName: "Opus", description: "Opus 4.8 · Most capable for complex work · ~2× usage vs Sonnet",
+                            effortLevels: ["low", "medium", "high", "xhigh", "max"], supportsAutoMode: true),
+                ClaudeModel(value: "haiku", displayName: "Haiku", description: "Haiku 4.5 · Fastest for quick answers",
+                            effortLevels: [], supportsAutoMode: false),
+            ]),
+        ])
+    }
+
     @Test func turnsDownRequestKindsTheAppDoesNotHandle() {
         let events = ClaudeEvent.decode(line(#"{"type":"control_request","request_id":"req-8","request":{"subtype":"hook_callback","callback_id":"hook_0","input":{}}}"#))
         #expect(events == [.unsupportedRequest(requestID: "req-8", subtype: "hook_callback")])

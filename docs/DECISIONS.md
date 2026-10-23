@@ -163,3 +163,23 @@ to start or wait for its parent to refresh the login. The terminal and the
 chat now drop every `CLAUDE*` variable the app inherited; settings the user
 exports in their shell profile come back through the login shell. This
 extends D-005.
+
+## D-016 Model, effort and Auto mode in the chat — 2026-10-23
+
+Under the message box: a model menu, an effort menu and an Auto switch,
+remembered between launches. Owner's request: model and effort choices, and
+a mode with only two options, Auto on or off (off is the D-013 behavior).
+
+- **Where the choices come from:** Claude Code's answer to initialize lists
+  the account's models with their effort levels and whether they support Auto
+  mode (a Pro plan: Default = Sonnet 4.6, Opus, Haiku; Haiku has neither). The
+  menus show exactly that, cached for the next launch; before the first
+  answer they show that Pro list. A choice a model can't take is left out of
+  the launch rather than failing.
+- **How a change applies:** from the next message, by restarting Claude Code
+  with `--resume`, `--model`, `--effort` and `--permission-mode auto|default`.
+  The conversation continues (tested live). Claude Code also has control
+  requests to switch model and mode mid-session, but effort has none, so one
+  path for all three is simpler.
+- **Auto on:** Claude Code's own classifier approves routine actions and asks
+  about risky ones; edits to the open document still have Undo.

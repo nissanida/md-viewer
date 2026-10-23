@@ -1,5 +1,6 @@
 import AppKit
 import MDViewerCore
+import WebKit
 
 /// The Claude symbol (web/claude-symbol.svg) for the chat's toolbar button and
 /// header, drawn in Claude's orange. It is Anthropic's trademark: fine in your
@@ -80,6 +81,12 @@ final class ChatPanelController: NSViewController {
     private var needsSignIn = false
     private var needsInstall = false
 
+    // Model, effort and Auto mode. A change while Claude Code runs applies from
+    // the next message, which restarts it in the same conversation.
+    private var settings = Preferences.chatSettings
+    private var models = Preferences.chatModels
+    private var restartPending = false
+
     private var transcript = ChatTranscript(folder: nil)
     private var pendingItemIDs: [String] = []
     private var flushScheduled = false
@@ -89,6 +96,7 @@ final class ChatPanelController: NSViewController {
     private let noticeSlot = NSStackView()
     private var shownNotice = ""
     private let input = ChatInputView()
+    private let optionsBar = ChatOptionsBar()
 
     private struct DocumentChange {
         let file: URL
@@ -123,10 +131,12 @@ final class ChatPanelController: NSViewController {
         transcriptView.onLink = { [weak self] in self?.host?.openChatLink($0) }
         input.onSend = { [weak self] in self?.send($0) }
         input.onStop = { [weak self] in self?.stop() }
+        optionsBar.onChange = { [weak self] in self?.settingsChanged($0) }
+        optionsBar.show(settings, models: models)
 
         let root = NSView()
         let webView = transcriptView.webView
-        for view in [header, webView, noticeSlot, input] as [NSView] {
+        for view in [header, webView, noticeSlot, input, optionsBar] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             root.addSubview(view)
         }
@@ -144,7 +154,10 @@ final class ChatPanelController: NSViewController {
             input.topAnchor.constraint(equalTo: noticeSlot.bottomAnchor),
             input.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             input.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            input.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+            optionsBar.topAnchor.constraint(equalTo: input.bottomAnchor, constant: -4),
+            optionsBar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            optionsBar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            optionsBar.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
         view = root
         documentChanged()
@@ -194,6 +207,11 @@ final class ChatPanelController: NSViewController {
         Task {
             let selection = await host.chatSelection()
             guard isWorking, self.turn == turn else { return } // stopped or started over meanwhile
+            // A new model, effort or mode needs a fresh Claude Code; the conversation is resumed.
+            if restartPending {
+                restartPending = false
+                if claude != nil { endSession() }
+            }
             // A new chat works in the window's folder; a session keeps its own,
             // so it can be resumed there if Claude Code has to start again.
             if claude == nil, sessionID == nil || transcript.folder == nil {
@@ -241,6 +259,7 @@ final class ChatPanelController: NSViewController {
 
     func newChat() {
         endSession()
+        restartPending = false
         sessionID = nil
         isWorking = false
         turnDocument = nil
@@ -282,7 +301,7 @@ final class ChatPanelController: NSViewController {
             }
             let process = ClaudeProcess(
                 executable: URL(fileURLWithPath: executable),
-                arguments: ClaudeLaunch.arguments(resumeSessionID: sessionID, model: DevAutomation.claudeModel),
+                arguments: ClaudeLaunch.arguments(resumeSessionID: sessionID, options: launchOptions),
                 environment: ClaudeLaunch.environment(from: environment), directory: folder, callbackQueue: .main,
                 onEvent: { [weak self] event in
                     MainActor.assumeIsolated { self?.handle(event, from: generation) }
@@ -307,6 +326,18 @@ final class ChatPanelController: NSViewController {
         }
     }
 
+    private var launchOptions: LaunchOptions {
+        var options = settings.launchOptions(models: models)
+        if let model = DevAutomation.claudeModel { options.model = model } // tests use a cheaper model
+        return options
+    }
+
+    private func settingsChanged(_ newSettings: ChatSettings) {
+        settings = newSettings
+        Preferences.chatSettings = newSettings
+        if claude != nil { restartPending = true }
+    }
+
     private func claudeIsReady(_ generation: Int) {
         guard generation == self.generation, let claude, !claudeReady else { return }
         claudeReady = true
@@ -324,6 +355,10 @@ final class ChatPanelController: NSViewController {
             claudeIsReady(generation)
         case .requestAnswered:
             break
+        case .modelsAvailable(let list):
+            models = list
+            Preferences.chatModels = list
+            optionsBar.show(settings, models: list)
         case .sessionStarted(let id, _):
             sessionID = id
         case .approvalRequested(let request):
@@ -545,12 +580,21 @@ final class ChatPanelController: NSViewController {
             "approvals": approvals.map { ["tool": $0.toolName, "id": $0.requestID] },
             "notice": shownNotice.split(separator: " ").first.map(String.init) ?? "",
             "input": input.text,
+            "settings": ["model": settings.model, "effort": settings.effort ?? "", "auto": settings.autoMode],
+            "models": models.map(\.value),
+            "restartPending": restartPending,
         ]
     }
 
     func typeForAutomation(_ text: String) {
         input.text = text
     }
+
+    func chooseForAutomation(_ newSettings: ChatSettings) {
+        optionsBar.choose(newSettings)
+    }
+
+    var transcriptWebView: WKWebView { transcriptView.webView }
 }
 
 /// A notice above the message box, with buttons: an approval, the offer to

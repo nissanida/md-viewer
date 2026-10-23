@@ -270,3 +270,35 @@ struct ChatTranscriptTests {
         #expect(transcript.addUserMessage("Hello", quote: nil).id != old.id)
     }
 }
+
+struct ChatSettingsTests {
+    // As Claude Code 2.1.158 lists them for a Pro plan.
+    private let models = [
+        ClaudeModel(value: "default", displayName: "Default (recommended)", description: "Sonnet 4.6 · Best for everyday tasks",
+                    effortLevels: ["low", "medium", "high", "max"], supportsAutoMode: true),
+        ClaudeModel(value: "opus", displayName: "Opus", description: "Opus 4.8 · Most capable for complex work",
+                    effortLevels: ["low", "medium", "high", "xhigh", "max"], supportsAutoMode: true),
+        ClaudeModel(value: "haiku", displayName: "Haiku", description: "Haiku 4.5 · Fastest for quick answers",
+                    effortLevels: [], supportsAutoMode: false),
+    ]
+
+    @Test func startsLikeClaudeCodesOwnDefaults() {
+        #expect(ChatSettings().launchOptions(models: models) == LaunchOptions())
+    }
+
+    @Test func passesTheModelAndEffortTheUserChose() {
+        let settings = ChatSettings(model: "opus", effort: "xhigh", autoMode: true)
+        #expect(settings.launchOptions(models: models) == LaunchOptions(model: "opus", effort: "xhigh", autoMode: true))
+    }
+
+    @Test func leavesOutWhatTheChosenModelCannotDo() {
+        // Haiku has no effort levels and no Auto mode; Default stops at "max", without "xhigh".
+        #expect(ChatSettings(model: "haiku", effort: "high", autoMode: true).launchOptions(models: models) == LaunchOptions(model: "haiku"))
+        #expect(ChatSettings(model: "default", effort: "xhigh", autoMode: false).launchOptions(models: models) == LaunchOptions())
+    }
+
+    @Test func trustsTheChoicesUntilClaudeCodeHasListedItsModels() {
+        let settings = ChatSettings(model: "opus", effort: "high", autoMode: true)
+        #expect(settings.launchOptions(models: []) == LaunchOptions(model: "opus", effort: "high", autoMode: true))
+    }
+}

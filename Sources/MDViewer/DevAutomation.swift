@@ -1,4 +1,5 @@
 import AppKit
+import MDViewerCore
 @preconcurrency import SwiftTerm
 import WebKit
 
@@ -98,8 +99,29 @@ enum DevAutomation {
             windowController.chat.send(argument.replacingOccurrences(of: "\\n", with: "\n"))
         case "chat-stop":
             windowController.chat.stop()
+        case "chat-options": // "model=opus effort=high auto=on", as if chosen under the message box
+            var settings = ChatSettings()
+            for pair in argument.split(separator: " ") {
+                let parts = pair.split(separator: "=", maxSplits: 1).map(String.init)
+                guard parts.count == 2 else { continue }
+                switch parts[0] {
+                case "model": settings.model = parts[1]
+                case "effort": settings.effort = parts[1] == "default" ? nil : parts[1]
+                case "auto": settings.autoMode = parts[1] == "on"
+                default: break
+                }
+            }
+            windowController.chat.chooseForAutomation(settings)
         case "chat-new":
             windowController.chat.newChat()
+        case "chat-eval": // "chat-eval /path/to/output.txt|javascript", in the chat's transcript page
+            let pieces = argument.split(separator: "|", maxSplits: 1).map(String.init)
+            guard pieces.count == 2 else { return }
+            let webView = windowController.chat.transcriptWebView
+            Task { @MainActor in
+                let result = try? await webView.callAsyncJavaScript(pieces[1], contentWorld: .page)
+                try? String(describing: result ?? "nil").write(toFile: pieces[0], atomically: true, encoding: .utf8)
+            }
         case "chat-state": // the chat's items, approvals and notice, as JSON
             let state = windowController.chat.automationState()
             if let data = try? JSONSerialization.data(withJSONObject: state, options: [.prettyPrinted, .sortedKeys]) {

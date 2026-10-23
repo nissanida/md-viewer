@@ -13,6 +13,8 @@ enum Preferences {
         static let outlineVisible = "outlineVisible"
         static let terminalVisible = "terminalVisible"
         static let chatVisible = "chatVisible"
+        static let chatSettings = "chatSettings"
+        static let chatModels = "chatModels"
         static let zoom = "zoom"
         static let trustedHTMLFiles = "trustedHTMLFiles"
         static let trustedFolders = "trustedFolders"
@@ -55,6 +57,26 @@ enum Preferences {
     static var chatVisible: Bool {
         get { defaults.bool(forKey: Key.chatVisible) }
         set { defaults.set(newValue, forKey: Key.chatVisible) }
+    }
+
+    /// The chat's model, effort and Auto mode.
+    static var chatSettings: ChatSettings {
+        get { decoded(Key.chatSettings) ?? ChatSettings() }
+        set { encode(newValue, Key.chatSettings) }
+    }
+
+    /// The models Claude Code last listed for this account.
+    static var chatModels: [ClaudeModel] {
+        get { decoded(Key.chatModels) ?? [] }
+        set { encode(newValue, Key.chatModels) }
+    }
+
+    private static func decoded<Value: Decodable>(_ key: String) -> Value? {
+        defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(Value.self, from: $0) }
+    }
+
+    private static func encode(_ value: some Encodable, _ key: String) {
+        defaults.set(try? JSONEncoder().encode(value), forKey: key)
     }
 
     static var zoom: Double {

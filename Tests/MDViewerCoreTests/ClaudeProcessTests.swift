@@ -58,7 +58,7 @@ struct ClaudeLaunchTests {
     }
 
     @Test func speaksJSONLinesBothWaysAndAsksForApprovalsOverStdio() {
-        let arguments = ClaudeLaunch.arguments(resumeSessionID: nil, model: nil)
+        let arguments = ClaudeLaunch.arguments(resumeSessionID: nil, options: .init())
         #expect(arguments.first == "-p")
         #expect(value(after: "--input-format", in: arguments) == "stream-json")
         #expect(value(after: "--output-format", in: arguments) == "stream-json")
@@ -67,17 +67,23 @@ struct ClaudeLaunchTests {
         #expect(value(after: "--append-system-prompt", in: arguments)?.contains("<mdviewer-context>") == true)
     }
 
-    @Test func resumesAnEarlierSessionAndUsesAChosenModel() {
-        let fresh = ClaudeLaunch.arguments(resumeSessionID: nil, model: nil)
-        let resumed = ClaudeLaunch.arguments(resumeSessionID: "s-1", model: "haiku")
-        #expect(!fresh.contains("--resume") && !fresh.contains("--model"))
+    @Test func resumesAnEarlierSessionWithTheChosenModelAndEffort() {
+        let fresh = ClaudeLaunch.arguments(resumeSessionID: nil, options: .init())
+        let resumed = ClaudeLaunch.arguments(resumeSessionID: "s-1", options: .init(model: "opus", effort: "xhigh"))
+        #expect(!fresh.contains("--resume") && !fresh.contains("--model") && !fresh.contains("--effort"))
         #expect(value(after: "--resume", in: resumed) == "s-1")
-        #expect(value(after: "--model", in: resumed) == "haiku")
+        #expect(value(after: "--model", in: resumed) == "opus")
+        #expect(value(after: "--effort", in: resumed) == "xhigh")
+    }
+
+    @Test func asksBeforeActingUnlessAutoModeIsOn() {
+        #expect(value(after: "--permission-mode", in: ClaudeLaunch.arguments(resumeSessionID: nil, options: .init())) == "default")
+        #expect(value(after: "--permission-mode", in: ClaudeLaunch.arguments(resumeSessionID: nil, options: .init(autoMode: true))) == "auto")
     }
 
     @Test func turnsOffToolsThatNeedScreensTheChatDoesNotHave() {
         // The chat can't show Claude's question forms or plan approvals; Claude asks in plain text instead.
-        let disallowed = value(after: "--disallowedTools", in: ClaudeLaunch.arguments(resumeSessionID: nil, model: nil)) ?? ""
+        let disallowed = value(after: "--disallowedTools", in: ClaudeLaunch.arguments(resumeSessionID: nil, options: .init())) ?? ""
         #expect(disallowed.contains("AskUserQuestion"))
         #expect(disallowed.contains("ExitPlanMode"))
     }

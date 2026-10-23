@@ -1,7 +1,7 @@
 # Document chat: design
 
 **Status:** built on branch `feature/document-chat` (2026-10-23), tested with a
-stand-in for Claude Code; a live test with real Claude is still to do.
+stand-in for Claude Code and live with real Claude.
 
 ## Goal
 
@@ -28,8 +28,14 @@ In the first version:
 - **Stop** ends the current request; **New Chat** starts over.
 - A clear notice when Claude Code isn't installed or isn't signed in.
 
-Left out on purpose: file pickers, slash commands, model picker, diff views,
-chat history across launches, pasted images.
+- Under the message box: the model (as Claude Code lists them for the
+  account), the effort (only the levels that model supports), and Auto mode
+  on or off (only for models that support it). Remembered between launches;
+  a change applies from the next message by restarting Claude Code with
+  `--resume`, so the conversation continues.
+
+Left out on purpose: file pickers, slash commands, diff views, chat history
+across launches, pasted images.
 
 ## How it works
 

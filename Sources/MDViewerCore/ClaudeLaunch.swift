@@ -29,7 +29,9 @@ public enum ClaudeLaunch {
         - Reply in the language they write in.
         """
 
-    public static func arguments(resumeSessionID: String?, model: String?) -> [String] {
+    /// - Parameter options: the model, effort and mode the user chose (see ChatSettings).
+    ///   In Auto mode Claude Code's own checker approves routine actions; otherwise it asks.
+    public static func arguments(resumeSessionID: String?, options: LaunchOptions) -> [String] {
         var arguments = [
             "-p",
             "--input-format", "stream-json",
@@ -37,12 +39,13 @@ public enum ClaudeLaunch {
             "--verbose",
             "--include-partial-messages",
             "--permission-prompt-tool", "stdio",
-            "--permission-mode", "default",
+            "--permission-mode", options.autoMode ? "auto" : "default",
             "--append-system-prompt", systemPrompt,
             "--disallowedTools", disallowedTools.joined(separator: ","),
         ]
         if let resumeSessionID { arguments += ["--resume", resumeSessionID] }
-        if let model { arguments += ["--model", model] }
+        if let model = options.model { arguments += ["--model", model] }
+        if let effort = options.effort { arguments += ["--effort", effort] }
         return arguments
     }
 

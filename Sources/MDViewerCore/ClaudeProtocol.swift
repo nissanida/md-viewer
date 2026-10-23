@@ -67,6 +67,8 @@ public enum ClaudeEvent: Equatable, Sendable {
     case approvalWithdrawn(requestID: String)
     /// The answer to a request the app sent (initialize, interrupt).
     case requestAnswered(requestID: String, error: String?)
+    /// The models the account can use, from Claude Code's answer to initialize.
+    case modelsAvailable([ClaudeModel])
     /// A request the app must turn down, so Claude Code doesn't wait for it.
     case unsupportedRequest(requestID: String, subtype: String)
     /// Claude Code couldn't answer, for example because it isn't signed in.
@@ -106,7 +108,9 @@ public enum ClaudeEvent: Equatable, Sendable {
         case "control_response":
             guard let response = message["response"], let id = response["request_id"]?.string else { return [] }
             let error = response["subtype"]?.string == "error" ? (response["error"]?.string ?? "The request failed.") : nil
-            return [.requestAnswered(requestID: id, error: error)]
+            // The answer to initialize lists the models this account can use.
+            let models = response["response"]?["models"]?.array.map { [ClaudeEvent.modelsAvailable($0.compactMap(ClaudeModel.init(json:)))] }
+            return [.requestAnswered(requestID: id, error: error)] + (models ?? [])
         case "result":
             let result = TurnResult(isError: message["is_error"]?.bool ?? false, message: message["result"]?.string,
                                     sessionID: message["session_id"]?.string)
