@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!--
+    Document content is untrusted. Only the app's own scripts may run; local
+    images come through mdv-file:, remote images only over https, and nothing
+    can make network requests, embed frames or submit forms.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' mdv-app:; style-src 'self' mdv-app: 'unsafe-inline'; img-src 'self' mdv-app: mdv-file: https: data:; media-src mdv-file: https:; font-src 'self' mdv-app:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="color-scheme" content="light dark">
+  <title>Preview</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="vendor/hljs-light.min.css" media="print, (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="vendor/hljs-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+</head>
+<body>
+  <main id="doc" class="markdown-body"></main>
+  <div id="link-status" hidden></div>
+  <script src="vendor/markdown-it.min.js"></script>
+  <script src="vendor/markdown-it-footnote.min.js"></script>
+  <script src="vendor/highlight.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script src="render.js"></script>
+  <script src="page.js"></script>
+</body>
+</html>

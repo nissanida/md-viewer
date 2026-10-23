@@ -1,0 +1,5 @@
+#!/bin/sh
+# Opens files or folders in MD Viewer:   mdviewer README.md   mdviewer docs/   mdviewer
+# With no arguments it opens the current folder.
+if [ "$#" -eq 0 ]; then set -- .; fi
+exec open -b dev.mdviewer.MDViewer "$@"

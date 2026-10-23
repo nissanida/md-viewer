@@ -1,0 +1,7 @@
+# Build products normally go to ~/Library/Caches/md_html_reader (see Makefile);
+# these cover builds started some other way.
+.build/
+.swiftpm/
+dist/
+node_modules/
+.DS_Store

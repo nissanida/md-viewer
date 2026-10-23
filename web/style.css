@@ -1,0 +1,240 @@
+/* MD Viewer preview: calm, readable typography that follows the system theme. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #fdfdfc;
+  --fg: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #a1a1a6;
+  --border: #e6e6e3;
+  --border-strong: #d2d2cf;
+  --code-bg: #f4f4f1;
+  --stripe: #f9f9f7;
+  --accent: #0b63ce;
+  --selection: rgba(11, 99, 206, 0.18);
+  --mark: #fff1a8;
+  --alert-note: #0969da;
+  --alert-tip: #1a7f37;
+  --alert-important: #8250df;
+  --alert-warning: #9a6700;
+  --alert-caution: #cf222e;
+  --body-font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Arial Hebrew", sans-serif;
+  --mono-font: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* Screen only, so printed and exported PDFs always use the light palette. */
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e1f;
+    --fg: #e4e4e6;
+    --muted: #a1a1a6;
+    --faint: #6e6e73;
+    --border: #343437;
+    --border-strong: #4a4a4e;
+    --code-bg: #29292b;
+    --stripe: #232325;
+    --accent: #5aa7ff;
+    --selection: rgba(90, 167, 255, 0.28);
+    --mark: #5c4d12;
+    --alert-note: #4493f8;
+    --alert-tip: #3fb950;
+    --alert-important: #ab7df8;
+    --alert-warning: #d29922;
+    --alert-caution: #f85149;
+  }
+}
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 var(--body-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+
+::selection { background: var(--selection); }
+
+.markdown-body {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 48px 36px 120px;
+}
+
+.markdown-body.is-empty::before {
+  content: "This document is empty.";
+  color: var(--faint);
+}
+
+.markdown-body > :first-child { margin-top: 0; }
+
+/* Text blocks */
+
+p, ul, ol, dl, table, pre, blockquote, details, figure { margin: 0 0 1em; }
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25;
+  font-weight: 650;
+  margin: 1.8em 0 0.6em;
+  scroll-margin-top: 20px;
+}
+h1 { font-size: 2em; font-weight: 700; letter-spacing: -0.015em; margin-top: 1.2em; }
+h2 { font-size: 1.5em; letter-spacing: -0.01em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.05em; }
+h5, h6 { font-size: 0.95em; color: var(--muted); }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+strong { font-weight: 650; }
+mark { background: var(--mark); color: inherit; padding: 0 0.15em; border-radius: 3px; }
+
+hr {
+  border: 0;
+  height: 1px;
+  background: var(--border);
+  margin: 2.4em 0;
+}
+
+ul, ol { padding-inline-start: 1.6em; }
+li + li { margin-top: 0.25em; }
+li > ul, li > ol { margin: 0.25em 0 0; }
+li > p { margin-bottom: 0.5em; }
+
+dt { font-weight: 650; }
+dd { margin-inline-start: 1.6em; }
+
+blockquote {
+  padding: 0.1em 1em;
+  border-inline-start: 3px solid var(--border-strong);
+  color: var(--muted);
+}
+blockquote > :last-child { margin-bottom: 0; }
+
+img, video { max-width: 100%; height: auto; }
+
+/* Code */
+
+code, kbd, samp, pre { font-family: var(--mono-font); }
+
+code {
+  font-size: 0.86em;
+  padding: 0.12em 0.36em;
+  border-radius: 5px;
+  background: var(--code-bg);
+}
+
+pre {
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: var(--code-bg);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+  direction: ltr;
+  text-align: left;
+}
+pre code { padding: 0; background: none; font-size: inherit; border-radius: 0; }
+
+pre.front-matter {
+  background: none;
+  border: 1px dashed var(--border-strong);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+kbd {
+  font-size: 0.82em;
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--code-bg);
+}
+
+/* Tables */
+
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+th, td { padding: 7px 13px; border: 1px solid var(--border); }
+th { font-weight: 650; text-align: start; background: var(--code-bg); }
+tr:nth-child(2n) td { background: var(--stripe); }
+
+/* Task lists */
+
+.contains-task-list { padding-inline-start: 1.3em; }
+.task-list-item { list-style: none; }
+.task-list-item-checkbox {
+  margin: 0 0.5em 0 -1.3em;
+  vertical-align: -0.1em;
+  accent-color: var(--accent);
+}
+[dir="rtl"] .task-list-item-checkbox, .task-list-item[dir="rtl"] .task-list-item-checkbox { margin: 0 -1.3em 0 0.5em; }
+
+/* Footnotes */
+
+hr.footnotes-sep { display: none; }
+section.footnotes {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
+  font-size: 0.88em;
+  color: var(--muted);
+}
+.footnote-ref a, a.footnote-backref { text-decoration: none; }
+
+/* Details */
+
+details { padding: 0.4em 0.8em; border: 1px solid var(--border); border-radius: 8px; }
+summary { cursor: pointer; font-weight: 600; }
+details[open] > summary { margin-bottom: 0.5em; }
+
+/* GitHub alerts */
+
+.markdown-alert { color: inherit; border-inline-start-color: var(--alert-color); }
+.markdown-alert-note { --alert-color: var(--alert-note); }
+.markdown-alert-tip { --alert-color: var(--alert-tip); }
+.markdown-alert-important { --alert-color: var(--alert-important); }
+.markdown-alert-warning { --alert-color: var(--alert-warning); }
+.markdown-alert-caution { --alert-color: var(--alert-caution); }
+.markdown-alert-title { color: var(--alert-color); font-weight: 650; margin-bottom: 0.3em; }
+
+/* Link target shown at the bottom of the window while hovering a link */
+
+#link-status {
+  position: fixed;
+  bottom: 0;
+  inset-inline-start: 0;
+  max-width: 70%;
+  padding: 3px 9px;
+  font: 11px/1.4 var(--body-font);
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-inline-start: 0;
+  border-start-end-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: ltr;
+}
+#link-status[hidden] { display: none; }
+
+@media print {
+  :root { color-scheme: light; --bg: #fff; }
+  /* Keep the shading of code, table headers and alerts on paper. */
+  pre, code, th, kbd, mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .markdown-body { max-width: none; padding: 0; }
+  pre { white-space: pre-wrap; }
+  #link-status { display: none; }
+}
