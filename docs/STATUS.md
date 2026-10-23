@@ -1,9 +1,8 @@
 # Status
 
-**As of 2026-10-23:** all features in the brief are built. Version 0.1.0 is
+**As of 2026-10-24:** all features in the brief are built. Version 0.1.0 is
 installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
-The code is committed locally on `main`, with no remote yet. **Next:**
-[publish to GitHub](#next-publish-to-github).
+Publishing to GitHub: see [On GitHub](#on-github).
 
 The [document chat](#document-chat) is merged into `main`, tested live with
 real Claude, and installed.
@@ -79,33 +78,28 @@ Code restarts in the same conversation, which takes a second or two).
   Documents or iCloud Drive (an ad-hoc signed app gets a new identity per
   build).
 
-## Next: publish to GitHub
+## On GitHub
 
-The owner will publish the source in a new session. Nothing has been pushed;
-there is no remote. The GitHub CLI is installed and signed in as `nissanida`.
+The repository is `nissanida/md-viewer`: public, MIT license, with the source
+and the app as a download on each release (D-017; owner's choices). Done
+before the first push:
 
-**Ask the owner first** (publishing is outward-facing): public or private, and
-the repository name. Recommended: public, source only, named `md-viewer`.
+- **License:** `LICENSE` (MIT, Daniel Nissani).
+- **Email:** every commit uses GitHub's no-reply address instead of the
+  personal email. It is set in this repository's `.git/config`, so new commits
+  here use it too. The history was rewritten once, before the first push.
+- **Claude symbol:** kept in this folder only (D-014). It is listed in
+  `.gitignore` and was removed from the history.
+- **Sample data:** the tests no longer use a personal name as a folder name.
 
-**Before the first push:**
-1. Add a `LICENSE` file (MIT recommended; confirm the copyright holder's name
-   with the owner).
-2. Replace the Hebrew personal name `דניאל` in
-   `Tests/MDViewerCoreTests/CoreTests.swift` (line 52, a sample folder name)
-   with a neutral word such as `מסמכים`, and rerun `make test`.
-3. Hide the personal email in commits. Look up the account's GitHub no-reply
-   address (`gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"'`),
-   set it for this repository only (`git config user.email <address>`), then
-   rewrite the existing commits' author:
-   `git rebase -r --root --exec 'git commit --amend --no-edit --reset-author'`.
-4. Keep it source-only: no app downloads. A downloaded build would be blocked
-   by Gatekeeper unless notarized (see README, "Notarization").
-5. Decide on the Claude symbol (D-014): ask Anthropic, or replace
-   `web/claude-symbol.svg` with a neutral icon.
-
-**Publish:** `gh repo create <name> --public --source . --remote origin --push`
-(or `--private`). Then check the repository page and add the URL and date to
-the log below.
+**To publish a new version:**
+1. Raise `VERSION` in the `Makefile`, run `make test`, then commit and push.
+2. Run `make zip`. It builds `MD-Viewer-<version>.zip` from the committed code
+   and prints its SHA-256.
+3. Publish it: `gh release create v<version> <zip> --target <commit> --title
+   "MD Viewer <version>" --notes-file <notes>`. Copy the previous release's
+   notes (install steps) and put in the new SHA-256.
+4. Run `make install` to update the app on this Mac.
 
 Good to know: the folder is in iCloud Drive, so the GitHub copy also serves as
 the backup. Build products and caches live in `~/Library/Caches/md_html_reader`

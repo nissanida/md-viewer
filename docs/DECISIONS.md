@@ -155,6 +155,12 @@ owner's own copy, but Anthropic's terms require written permission to use it
 in a published app. Before publishing, ask Anthropic or replace that one file
 with a neutral icon (without the file, the app falls back to a sparkle).
 
+**For publishing (2026-10-24, owner's call):** the file stays in the owner's
+copy only. It is listed in `.gitignore` and was removed from the history
+before the first push, so the repository, the download and anyone's own build
+show the sparkle. Considered: the sparkle for the owner too, or waiting for
+Anthropic's permission.
+
 ## D-015 Child processes don't inherit a parent Claude Code session — 2026-10-23
 
 Launched from a Claude Code session (while developing it), the app inherits
@@ -188,3 +194,20 @@ a mode with only two options, Auto on or off (off is the D-013 behavior).
   pop-up buttons. Menus name the model behind each choice (Default reads
   "Sonnet 4.6" on a Pro plan), so Sonnet is visible even though Claude Code
   lists it only as the default.
+
+## D-017 Two ways to install: download or build — 2026-10-24
+
+The GitHub page offers the app as a download (a zip attached to each release)
+and the steps to build it from source. Owner's call, over the earlier plan of
+source only.
+
+- **Why:** anyone can install it, not only people with Apple's developer tools
+  and Terminal.
+- **The catch:** the download is signed ad hoc, not notarized, so macOS blocks
+  its first launch until the user clicks Open Anyway (README, "Download the
+  app"). An app built on the same Mac opens without that. Notarizing needs a
+  paid Apple Developer account (README, "Notarization").
+- **How:** `make zip` builds the zip from the committed code (`git archive`),
+  never from the working folder, so files kept only in the owner's copy, such
+  as the Claude symbol (D-014), can't ship by accident. It stops if the symbol
+  is in the app anyway.

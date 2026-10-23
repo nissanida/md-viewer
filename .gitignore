@@ -5,3 +5,7 @@
 dist/
 node_modules/
 .DS_Store
+
+# The Claude symbol is Anthropic's trademark: it stays in the owner's copy and
+# is never published (D-014). Without it, the chat button shows a sparkle.
+web/claude-symbol.svg

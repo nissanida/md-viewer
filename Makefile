@@ -9,7 +9,7 @@ ARCHS   ?= arm64 x86_64
 VERSION ?= 0.1.0
 LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
-.PHONY: help run app reveal install install-cli uninstall test test-swift test-web vendor icon clean
+.PHONY: help run app reveal install install-cli uninstall zip test test-swift test-web vendor icon clean
 
 help: ## Show this list
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  make %-12s %s\n", $$1, $$2}'
@@ -41,6 +41,9 @@ uninstall: ## Remove the app and the `mdviewer` command
 	$(LSREGISTER) -u "$(APPS)/MD Viewer.app" 2>/dev/null || true
 	rm -rf "$(APPS)/MD Viewer.app"
 	rm -f "$(BINDIR)/mdviewer"
+
+zip: ## Build the download for a GitHub release from the committed code
+	VERSION="$(VERSION)" BUILD_DIR="$(CACHE)" scripts/package-release.sh
 
 test: test-swift test-web ## Run all tests
 

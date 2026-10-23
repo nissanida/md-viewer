@@ -3,8 +3,8 @@ import MDViewerCore
 import WebKit
 
 /// The Claude symbol (web/claude-symbol.svg) for the chat's toolbar button and
-/// header, drawn in Claude's orange. It is Anthropic's trademark: fine in your
-/// own copy, but publishing the app with it needs Anthropic's permission.
+/// header, drawn in Claude's orange. It is Anthropic's trademark, so the file
+/// is not in the repository (D-014); without it, the button shows a sparkle.
 @MainActor
 enum ClaudeSymbol {
     static let color = NSColor(srgbRed: 0xD9 / 255, green: 0x77 / 255, blue: 0x57 / 255, alpha: 1)

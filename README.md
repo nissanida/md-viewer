@@ -7,15 +7,38 @@ second, and free and open source all the way down.
 
 ## Install
 
-You need the Xcode Command Line Tools (`xcode-select --install`). Then:
+MD Viewer runs on macOS 14 or later, on Apple Silicon and Intel Macs. Download
+the app, or build it yourself.
+
+### Download the app
+
+1. Download the `.zip` file from the
+   [latest release](https://github.com/nissanida/md-viewer/releases/latest),
+   and open it to unzip.
+2. Drag **MD Viewer** into your **Applications** folder.
+3. Open it. The first time, macOS blocks it, because the app isn't notarized
+   by Apple (see [Notarization](#notarization-later)). Close the warning, open
+   **System Settings → Privacy & Security**, scroll down, click **Open
+   Anyway** next to MD Viewer, and confirm. You do this once per Mac.
+
+On macOS 14, right-clicking the app and choosing **Open** also works (macOS 15
+removed that shortcut). Or, in Terminal:
+`xattr -dr com.apple.quarantine "/Applications/MD Viewer.app"`.
+
+### Build it yourself
+
+An app you build on your own Mac opens without that warning. You need the
+Xcode Command Line Tools (`xcode-select --install`). Then:
 
 ```bash
+git clone https://github.com/nissanida/md-viewer.git
+cd md-viewer
 make install
 ```
 
 This builds the app for Apple Silicon and Intel, copies it to
-`/Applications/MD Viewer.app` and registers it with Finder. Run the same
-command again after any change to rebuild and reinstall. To drag the app into
+`/Applications/MD Viewer.app` and registers it with Finder. Run `make install`
+again after any change to rebuild and reinstall. To drag the app into
 Applications yourself instead, run `make app && make reveal`.
 
 Optional command-line helper (`mdviewer README.md`, `mdviewer docs/`, or just
@@ -38,20 +61,6 @@ The Finder way works too: select a `.md` file, press ⌘I (Get Info), choose
 **MD Viewer** under **Open with**, and click **Change All…**. Use the same steps
 with another app to switch back. As HTML default, MD Viewer opens local HTML
 files (with scripts off until trusted); web links still open in your browser.
-
-### Opening the app on another Mac
-
-The app is signed ad hoc, not by a registered Apple developer. An app you build
-yourself runs without warnings. If you copy it to another Mac, macOS blocks
-the first launch. On macOS 15 and later the old right-click → **Open** trick
-no longer works:
-
-1. Try to open the app once, and dismiss the warning.
-2. Open **System Settings → Privacy & Security**, scroll down, and click
-   **Open Anyway** next to MD Viewer.
-
-Or, in Terminal: `xattr -dr com.apple.quarantine "/Applications/MD Viewer.app"`.
-See [Notarization](#notarization-later) to remove the warning for good.
 
 ## Using it
 
@@ -167,6 +176,7 @@ Folders**, takes it back.
 make run FILE=README.md   # run from source, without installing
 make test                 # Swift tests + markdown rendering tests (needs Node)
 make app ARCHS=arm64      # faster build, Apple Silicon only
+make zip                  # the download for a release, built from the committed code
 make help                 # every task
 ```
 
@@ -180,7 +190,7 @@ code signing rejects).
 | `Sources/MDViewerCore/` | Logic without UI: file watching, folder listing, links, shell lookup |
 | `web/` | The preview page: `render.js` (markdown pipeline), `page.js`, `style.css`, `vendor/` libraries; the chat's transcript page: `chat.html`, `chat.js`, `chat-page.js`, `chat.css` |
 | `packaging/` | `Info.plist` (file types), app icon, `mdviewer` script |
-| `scripts/` | App build, icon, vendoring, the automation helper, and a stand-in for `claude` (`fake-claude.py`) |
+| `scripts/` | App build, the release zip, icon, vendoring, the automation helper, and a stand-in for `claude` (`fake-claude.py`) |
 | `Tests/` | Swift tests (`MDViewerCoreTests`) and rendering tests (`web/`) |
 
 The JavaScript libraries are pinned in `scripts/update-vendor.sh` and committed

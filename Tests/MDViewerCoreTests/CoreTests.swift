@@ -49,7 +49,7 @@ struct LinkRouterTests {
     }
 
     @Test func roundTripsLocalFileURLs() {
-        let file = URL(fileURLWithPath: "/Users/me/דניאל/a b.png")
+        let file = URL(fileURLWithPath: "/Users/me/מסמכים/a b.png")
         #expect(LocalFileURL.fileURL(from: LocalFileURL.make(for: file)) == file)
     }
 }

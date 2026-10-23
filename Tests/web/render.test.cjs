@@ -72,10 +72,10 @@ test('resolves relative images against the document folder', () => {
 })
 
 test('handles folders with Hebrew names', () => {
-  const baseDir = 'file:///Users/me/%D7%93%D7%A0%D7%99%D7%90%D7%9C/'
+  const baseDir = 'file:///Users/me/%D7%9E%D7%A1%D7%9E%D7%9B%D7%99%D7%9D/'
   const { dom } = render('![](%D7%AA%D7%9E%D7%95%D7%A0%D7%94.png)', { baseDir })
   assert.equal(dom.querySelector('img').getAttribute('src'),
-    'mdv-file://local/Users/me/%D7%93%D7%A0%D7%99%D7%90%D7%9C/%D7%AA%D7%9E%D7%95%D7%A0%D7%94.png')
+    'mdv-file://local/Users/me/%D7%9E%D7%A1%D7%9E%D7%9B%D7%99%D7%9D/%D7%AA%D7%9E%D7%95%D7%A0%D7%94.png')
 })
 
 test('rewrites links to local files but keeps web links and anchors', () => {
