@@ -2,7 +2,8 @@
 
 **As of 2026-10-24:** all features in the brief are built. Version 0.1.0 is
 installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
-Publishing to GitHub: see [On GitHub](#on-github).
+Publishing to GitHub is prepared but paused, with nothing pushed (owner's
+call): see [Publishing to GitHub](#publishing-to-github).
 
 The [document chat](#document-chat) is merged into `main`, tested live with
 real Claude, and installed.
@@ -78,19 +79,31 @@ Code restarts in the same conversation, which takes a second or two).
   Documents or iCloud Drive (an ad-hoc signed app gets a new identity per
   build).
 
-## On GitHub
+## Publishing to GitHub
 
-The repository is `nissanida/md-viewer`: public, MIT license, with the source
-and the app as a download on each release (D-017; owner's choices). Done
-before the first push:
+Prepared on 2026-10-24, then paused before anything was pushed (owner's
+call). There is no remote yet. The owner's choices: public, named
+`md-viewer`, MIT license, and both a download and build steps (D-017).
 
-- **License:** `LICENSE` (MIT, Daniel Nissani).
-- **Email:** every commit uses GitHub's no-reply address instead of the
-  personal email. It is set in this repository's `.git/config`, so new commits
-  here use it too. The history was rewritten once, before the first push.
-- **Claude symbol:** kept in this folder only (D-014). It is listed in
-  `.gitignore` and was removed from the history.
-- **Sample data:** the tests no longer use a personal name as a folder name.
+**Done, committed here:**
+- `LICENSE` (MIT, Daniel Nissani).
+- New commits here use GitHub's no-reply address instead of the personal
+  email (set in this repository's `.git/config`).
+- The Claude symbol stays in this folder only (D-014): it is listed in
+  `.gitignore` and no longer tracked.
+- The tests no longer use a personal name as a folder name.
+- README install steps for both ways, and `make zip` for the download.
+  Tested: universal, 3.1 MB, signature valid after unzipping, no Claude symbol.
+
+**Left, when the owner says go:**
+1. Rewrite the six older commits, which still carry the personal email and
+   the Claude symbol: swap in the no-reply address and drop the symbol file,
+   keeping messages, dates and code. It needs the owner's explicit yes,
+   because Claude Code's safety check blocks history rewrites. Back up
+   `web/claude-symbol.svg` first: the rewrite deletes it from the folder.
+2. `gh repo create md-viewer --public --source . --remote origin --push`.
+3. `make zip`, then publish the zip as release v0.1.0 (steps below).
+4. Check the repository page, and add the URL and date to the log.
 
 **To publish a new version:**
 1. Raise `VERSION` in the `Makefile`, run `make test`, then commit and push.
@@ -112,6 +125,10 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-10-24:** prepared publishing on GitHub (license, install steps for a
+  download and for building, `make zip`, the Claude symbol out of git, a
+  neutral test folder name); paused before the history rewrite and the first
+  push (owner's call).
 - **2026-10-23:** built the document chat on `feature/document-chat`: a chat
   panel that runs Claude Code in its message mode, edits the open document
   with Undo, asks before anything else, and uses the Claude symbol (owner's
