@@ -127,6 +127,9 @@ syntax colors in the editor, tabs or multiple windows.
   box (owner's request), fixed the transcript not following new messages when
   a notice opened under it, tested live with real Claude, and installed the
   chat build in `/Applications`.
+- **2026-10-23:** restyled the model and effort choices as pill buttons named
+  for the model behind them, and in Auto mode moved Undo to a small button in
+  the chat's header (both at the owner's request); reinstalled.
 - **2026-10-23:** committed everything locally (`main`), and logged the steps
   to publish on GitHub in a new session.
 - **2026-10-23:** the terminal now starts in the open folder (project root),

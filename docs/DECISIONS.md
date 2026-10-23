@@ -182,4 +182,9 @@ a mode with only two options, Auto on or off (off is the D-013 behavior).
   requests to switch model and mode mid-session, but effort has none, so one
   path for all three is simpler.
 - **Auto on:** Claude Code's own classifier approves routine actions and asks
-  about risky ones; edits to the open document still have Undo.
+  about risky ones; edits to the open document still have Undo, shown as a
+  small button in the header instead of a bar over the chat (owner's call).
+- **Look (owner's call):** pill buttons in the chat's style rather than macOS
+  pop-up buttons. Menus name the model behind each choice (Default reads
+  "Sonnet 4.6" on a Pro plan), so Sonnet is visible even though Claude Code
+  lists it only as the default.

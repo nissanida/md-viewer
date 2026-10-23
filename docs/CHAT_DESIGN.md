@@ -32,7 +32,10 @@ In the first version:
   account), the effort (only the levels that model supports), and Auto mode
   on or off (only for models that support it). Remembered between launches;
   a change applies from the next message by restarting Claude Code with
-  `--resume`, so the conversation continues.
+  `--resume`, so the conversation continues. The model and effort are small
+  pill buttons in the chat's style that open a menu naming each model.
+- In Auto mode, Undo is a small button in the panel's header rather than a bar
+  over the chat, since Claude may change things often.
 
 Left out on purpose: file pickers, slash commands, diff views, chat history
 across launches, pasted images.

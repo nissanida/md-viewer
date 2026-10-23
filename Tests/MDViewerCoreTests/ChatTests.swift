@@ -302,3 +302,25 @@ struct ChatSettingsTests {
         #expect(settings.launchOptions(models: []) == LaunchOptions(model: "opus", effort: "high", autoMode: true))
     }
 }
+
+struct ClaudeModelNameTests {
+    @Test func namesTheModelBehindEachChoice() {
+        let standard = ClaudeModel(value: "default", displayName: "Default (recommended)", description: "Sonnet 4.6 · Best for everyday tasks",
+                                   effortLevels: [], supportsAutoMode: true)
+        let opus = ClaudeModel(value: "opus", displayName: "Opus", description: "Opus 4.8 · Most capable for complex work · ~2× usage vs Sonnet",
+                               effortLevels: [], supportsAutoMode: true)
+        #expect(standard.name == "Sonnet 4.6")
+        #expect(standard.summary == "Best for everyday tasks")
+        #expect(opus.name == "Opus 4.8")
+        #expect(opus.summary == "Most capable for complex work · ~2× usage vs Sonnet")
+    }
+
+    @Test func fallsBackToTheListedNameWithoutADescription() {
+        let bare = ClaudeModel(value: "default", displayName: "Default (recommended)", description: nil, effortLevels: [], supportsAutoMode: true)
+        let short = ClaudeModel(value: "haiku", displayName: "Haiku", description: "Haiku 4.5", effortLevels: [], supportsAutoMode: false)
+        #expect(bare.name == "Default")
+        #expect(bare.summary == nil)
+        #expect(short.name == "Haiku 4.5")
+        #expect(short.summary == nil)
+    }
+}

@@ -97,6 +97,8 @@ final class ChatPanelController: NSViewController {
     private var shownNotice = ""
     private let input = ChatInputView()
     private let optionsBar = ChatOptionsBar()
+    /// In Auto mode, Undo is this small button in the header instead of a bar over the chat.
+    private let undoPill = ChatPillButton()
 
     private struct DocumentChange {
         let file: URL
@@ -121,7 +123,12 @@ final class ChatPanelController: NSViewController {
         let symbol = NSImageView(image: ClaudeSymbol.image(size: 13))
         let newChat = iconButton("square.and.pencil", "New Chat", #selector(newChatClicked))
         let hide = iconButton("xmark", "Hide Chat (⌃⌘C)", #selector(hideClicked))
-        let header = NSStackView(views: [symbol, title, documentLabel, NSView(), newChat, hide])
+        undoPill.title = "Undo"
+        undoPill.icon = NSImage(systemSymbolName: "arrow.uturn.backward", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 9, weight: .semibold))
+        undoPill.onPress = { [weak self] in self?.undoLastChange() }
+        undoPill.isHidden = true
+        let header = NSStackView(views: [symbol, title, documentLabel, NSView(), undoPill, newChat, hide])
         header.spacing = 6
         header.edgeInsets = NSEdgeInsets(top: 0, left: 16, bottom: 0, right: 8)
 
@@ -336,6 +343,7 @@ final class ChatPanelController: NSViewController {
         settings = newSettings
         Preferences.chatSettings = newSettings
         if claude != nil { restartPending = true }
+        updateControls() // Undo moves between the bar and the header with Auto mode
     }
 
     private func claudeIsReady(_ generation: Int) {
@@ -483,9 +491,17 @@ final class ChatPanelController: NSViewController {
 
     // MARK: Updating the view
 
+    /// Auto mode as it applies: on, and the chosen model supports it.
+    private var autoModeOn: Bool {
+        settings.launchOptions(models: models).autoMode
+    }
+
     private func updateControls() {
         input.isWorking = isWorking
         updateNotice()
+        // In Auto mode Claude changes things more freely, so Undo waits quietly in the header.
+        undoPill.isHidden = !(autoModeOn && lastChange != nil && !isWorking)
+        undoPill.toolTip = lastChange.map { "Put \($0.file.lastPathComponent) back as it was before Claude’s last change" }
         let streaming = transcript.items.last?.streaming == true
         let status: String? = !isWorking || streaming || !approvals.isEmpty ? nil : (claudeReady ? "Thinking" : "Starting Claude")
         transcriptView.setStatus(status)
@@ -529,7 +545,7 @@ final class ChatPanelController: NSViewController {
                                    ("Dismiss", { self?.needsInstall = false; self?.updateControls() }),
                                ])
             }
-        } else if let change = lastChange, !isWorking {
+        } else if let change = lastChange, !isWorking, !autoModeOn {
             key = "undo " + change.file.path(percentEncoded: false) + String(change.after.hashValue)
             make = { [weak self] in
                 ChatNoticeView(symbol: "arrow.uturn.backward.circle", message: "Claude changed \(change.file.lastPathComponent).", actions: [

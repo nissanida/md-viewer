@@ -20,6 +20,23 @@ public struct ClaudeModel: Codable, Equatable, Sendable {
         self.supportsAutoMode = supportsAutoMode
     }
 
+    /// The model behind the choice, for people: "Sonnet 4.6" rather than
+    /// "Default (recommended)". Taken from the description's first part.
+    public var name: String {
+        if let first = descriptionParts.first { return first }
+        return displayName.replacingOccurrences(of: " (recommended)", with: "")
+    }
+
+    /// The rest of the description: "Best for everyday tasks".
+    public var summary: String? {
+        let rest = descriptionParts.dropFirst()
+        return rest.isEmpty ? nil : rest.joined(separator: " · ")
+    }
+
+    private var descriptionParts: [String] {
+        (description ?? "").components(separatedBy: " · ").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+    }
+
     init?(json: JSONValue) {
         guard let value = json["value"]?.string else { return nil }
         self.init(value: value, displayName: json["displayName"]?.string ?? value, description: json["description"]?.string,

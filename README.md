@@ -105,11 +105,13 @@ CLAUDE.md, in the same folder the terminal uses.
   request, and **New Chat** (in the panel's header) starts over.
 - Unsaved edits are saved before a message is sent, so Claude works on what
   you see.
-- Under the message box, choose the model, how much effort Claude puts in,
-  and **Auto** mode. Off (the default): Claude asks before anything beyond
-  the open document. On: Claude Code's own checker approves routine actions
-  and asks only about risky ones (not every model supports it). Choices are
-  remembered and apply from your next message.
+- Under the message box, choose the model (named for the model behind it,
+  such as Sonnet 4.6 for Claude Code's default), how much effort Claude puts
+  in, and **Auto** mode. Off (the default): Claude asks before anything
+  beyond the open document. On: Claude Code's own checker approves routine
+  actions and asks only about risky ones (not every model supports it), and
+  Undo becomes a small button in the panel's header instead of a bar. Choices
+  are remembered and apply from your next message.
 - If Claude Code isn't installed or signed in, the panel says what to do.
 
 ### Terminal and Claude Code

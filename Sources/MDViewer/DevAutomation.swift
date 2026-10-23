@@ -38,7 +38,7 @@ enum DevAutomation {
 
     private static func run(_ action: String, _ argument: String, _ windowController: MainWindowController) {
         switch action {
-        case "snapshot": snapshot(windowController.window, to: URL(fileURLWithPath: argument))
+        case "snapshot": snapshot(windowController.window, to: URL(fileURLWithPath: argument), redrawing: [windowController.chat.view])
         case "terminal-text": writeTerminalText(windowController.window, to: URL(fileURLWithPath: argument))
         case "action":
             // Straight to the window controller: the menu's usual route (the key
@@ -78,7 +78,12 @@ enum DevAutomation {
         case "click": // presses the button with this title (banner buttons, for example)
             // Looks in an open sheet (an alert) first, then in the window.
             let roots = [windowController.window?.attachedSheet, windowController.window].compactMap { $0?.contentView?.superview }
-            roots.flatMap(allSubviews).compactMap { $0 as? NSButton }.first { $0.title == argument && !$0.isHiddenOrHasHiddenAncestor }?.performClick(nil)
+            let views = roots.flatMap(allSubviews).filter { !$0.isHiddenOrHasHiddenAncestor }
+            if let button = views.compactMap({ $0 as? NSButton }).first(where: { $0.title == argument }) {
+                button.performClick(nil)
+            } else if let pill = views.compactMap({ $0 as? ChatPillButton }).first(where: { $0.title == argument }) {
+                _ = pill.accessibilityPerformPress() // the chat's own pill buttons
+            }
         case "eval": // "eval /path/to/output.txt|javascript"
             let pieces = argument.split(separator: "|", maxSplits: 1).map(String.init)
             guard pieces.count == 2, let frameView = windowController.window?.contentView?.superview,
@@ -173,11 +178,19 @@ enum DevAutomation {
 
     /// Draws the window into a PNG. Web views render in another process and the
     /// terminal draws straight into layers, so those are layered over the AppKit drawing.
-    private static func snapshot(_ window: NSWindow?, to url: URL) {
+    /// - Parameter redrawing: panels drawn again on their own: the window's drawing
+    ///   can leave out the strip of a full-height panel just under the toolbar.
+    private static func snapshot(_ window: NSWindow?, to url: URL, redrawing panels: [NSView] = []) {
         guard let frameView = window?.contentView?.superview else { return }
         let bounds = frameView.bounds
         guard let rep = frameView.bitmapImageRepForCachingDisplay(in: bounds) else { return }
         frameView.cacheDisplay(in: bounds, to: rep)
+        let panelShots: [(NSBitmapImageRep, NSRect)] = panels.compactMap { panel in
+            guard panel.window != nil, !panel.isHiddenOrHasHiddenAncestor, panel.bounds.width > 0,
+                  let panelRep = panel.bitmapImageRepForCachingDisplay(in: panel.bounds) else { return nil }
+            panel.cacheDisplay(in: panel.bounds, to: panelRep)
+            return (panelRep, panel.convert(panel.bounds, to: frameView))
+        }
 
         let webViews = allSubviews(of: frameView).compactMap { $0 as? WKWebView }.filter { $0.window != nil && !$0.isHiddenOrHasHiddenAncestor && $0.bounds.width > 0 }
         Task { @MainActor in
@@ -190,6 +203,10 @@ enum DevAutomation {
             let image = NSImage(size: bounds.size)
             image.lockFocus()
             rep.draw(in: bounds)
+            for (panelRep, rect) in panelShots {
+                // Blended over the window, since the panel's own drawing is see-through where it has no background.
+                panelRep.draw(in: rect, from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
+            }
             // The terminal draws into layers whose contents can't be read back, so
             // snapshots show its text on black; the real view uses the theme colors.
             for terminal in allSubviews(of: frameView).compactMap({ $0 as? TerminalView }) where !terminal.isHiddenOrHasHiddenAncestor {

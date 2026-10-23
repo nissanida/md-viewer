@@ -74,7 +74,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
         outlineItem.canCollapse = true
 
         chatItem = NSSplitViewItem(inspectorWithViewController: chatPanel)
-        chatItem.minimumThickness = 260
+        chatItem.minimumThickness = 280
         chatItem.maximumThickness = 640
         chatItem.canCollapse = true
 
