@@ -5,6 +5,37 @@ installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
 The code is committed locally on `main`, with no remote yet. **Next:**
 [publish to GitHub](#next-publish-to-github).
 
+The [document chat](#document-chat-branch-featuredocument-chat) is built on the
+branch `feature/document-chat`, not merged yet: it waits for a live test with
+real Claude.
+
+## Document chat (branch `feature/document-chat`)
+
+A chat panel on the right (⌃⌘C, or the Claude button in the toolbar) for
+changing the open document in plain words. Design: `docs/CHAT_DESIGN.md`;
+decisions D-012 to D-015.
+
+| Area | How | Result |
+| --- | --- | --- |
+| Claude Code's message format, launch arguments, the transcript, step wording, approvals, the context sent with each message | 54 Swift tests, with real output from Claude Code 2.1.158 where it matters | Pass |
+| Finding `claude` through the login shell, dropping a parent session's variables, running the process | 10 Swift tests, including a stand-in `claude` script and writing after it exited | Pass |
+| The transcript page: each item kind, right to left text, streaming, sanitizing, no remote images | 8 Node tests | Pass |
+| The panel in the app | A test copy driven through the automation hook with `scripts/fake-claude.py` | Edit applied without asking; Undo restored the file byte for byte and Claude was told; Allow and Deny; Stop; the not-signed-in notice; selected text sent and shown; dark mode |
+
+**Not tested yet:**
+- **A live conversation with real Claude.** Claude Code isn't signed in on
+  this Mac outside the Claude desktop app. Run `claude auth login` once, then
+  test an edit, an approval and Stop.
+- **Real key presses** in the message box (Return sends, Shift+Return adds a
+  line). Messages were sent through the automation hook.
+- **The toolbar symbol's color in the front window.** Snapshots of the
+  background window show it gray, like the other toolbar icons; the header
+  shows it orange.
+
+**Known limitations:** chats aren't kept after quitting; there is one chat per
+window, working in the folder where it started; long tool steps are cut short
+to one line.
+
 ## What was tested, and how
 
 | Area | How | Result |
@@ -71,6 +102,8 @@ the repository name. Recommended: public, source only, named `md-viewer`.
    `git rebase -r --root --exec 'git commit --amend --no-edit --reset-author'`.
 4. Keep it source-only: no app downloads. A downloaded build would be blocked
    by Gatekeeper unless notarized (see README, "Notarization").
+5. If the chat branch is merged first: decide on the Claude symbol (D-014).
+   Ask Anthropic, or replace `web/claude-symbol.svg` with a neutral icon.
 
 **Publish:** `gh repo create <name> --public --source . --remote origin --push`
 (or `--private`). Then check the repository page and add the URL and date to
@@ -87,6 +120,10 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-10-23:** built the document chat on `feature/document-chat`: a chat
+  panel that runs Claude Code in its message mode, edits the open document
+  with Undo, asks before anything else, and uses the Claude symbol (owner's
+  request). Tested with a stand-in; the live test waits for signing in.
 - **2026-10-23:** committed everything locally (`main`), and logged the steps
   to publish on GitHub in a new session.
 - **2026-10-23:** the terminal now starts in the open folder (project root),

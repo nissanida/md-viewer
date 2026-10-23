@@ -117,7 +117,7 @@ final class TerminalPanelController: NSViewController, @preconcurrency LocalProc
     }
 
     /// Starts a fresh shell in `folder`, ending the current one.
-    func startShell(in folder: URL) {
+    func startShell(in folder: URL, startingClaude: Bool = Preferences.autoStartClaude) {
         stopShell()
         _ = view // make sure the panel is built
         self.folder = folder
@@ -150,7 +150,17 @@ final class TerminalPanelController: NSViewController, @preconcurrency LocalProc
         )
         isShellRunning = true
         updateHeader()
-        if Preferences.autoStartClaude { startClaude() }
+        if startingClaude { startClaude() }
+    }
+
+    /// Types a command at the prompt and runs it (signing in to Claude Code,
+    /// from the chat). A shell that was just started reads it once its profile
+    /// has loaded.
+    func run(_ command: String, justStarted: Bool) {
+        guard isShellRunning, justStarted || isShellIdle else { return NSSound.beep() }
+        terminal?.send(txt: command + "\r")
+        focus()
+        updateHeader()
     }
 
     func stopShell() {

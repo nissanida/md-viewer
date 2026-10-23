@@ -24,6 +24,17 @@ enum DevAutomation {
         NSLog("MD Viewer: automation enabled")
     }
 
+    /// While developing, with automation on: a stand-in for `claude`
+    /// (MDV_CLAUDE_PATH) and a cheaper model (MDV_CLAUDE_MODEL) for the chat.
+    nonisolated static var claudePath: String? { setting("MDV_CLAUDE_PATH") }
+    nonisolated static var claudeModel: String? { setting("MDV_CLAUDE_MODEL") }
+
+    private nonisolated static func setting(_ name: String) -> String? {
+        let env = ProcessInfo.processInfo.environment
+        guard env["MDV_AUTOMATION"] == "1", let value = env[name], !value.isEmpty else { return nil }
+        return value
+    }
+
     private static func run(_ action: String, _ argument: String, _ windowController: MainWindowController) {
         switch action {
         case "snapshot": snapshot(windowController.window, to: URL(fileURLWithPath: argument))
@@ -80,6 +91,19 @@ enum DevAutomation {
             guard let frameView = windowController.window?.contentView?.superview else { return }
             for webView in allSubviews(of: frameView).compactMap({ $0 as? WKWebView }) where !webView.isHiddenOrHasHiddenAncestor {
                 webView.evaluateJavaScript("window.scrollTo(0, \(Double(argument) ?? 0))")
+            }
+        case "chat-type": // puts text in the chat's message box ("\n" for a new line)
+            windowController.chat.typeForAutomation(argument.replacingOccurrences(of: "\\n", with: "\n"))
+        case "chat-send": // sends a message, as if typed and sent
+            windowController.chat.send(argument.replacingOccurrences(of: "\\n", with: "\n"))
+        case "chat-stop":
+            windowController.chat.stop()
+        case "chat-new":
+            windowController.chat.newChat()
+        case "chat-state": // the chat's items, approvals and notice, as JSON
+            let state = windowController.chat.automationState()
+            if let data = try? JSONSerialization.data(withJSONObject: state, options: [.prettyPrinted, .sortedKeys]) {
+                try? data.write(to: URL(fileURLWithPath: argument))
             }
         case "appearance": NSApp.appearance = argument == "dark" ? NSAppearance(named: .darkAqua) : argument == "light" ? NSAppearance(named: .aqua) : nil
         case "resize":

@@ -2,20 +2,22 @@ import AppKit
 import MDViewerCore
 import UniformTypeIdentifiers
 
-/// The app's single window: file sidebar, document, outline, and terminal panel.
-/// Coordinates opening files and folders, watching them for changes, and the
-/// menu and toolbar actions.
+/// The app's single window: file sidebar, document, outline, chat and terminal
+/// panel. Coordinates opening files and folders, watching them for changes, and
+/// the menu and toolbar actions.
 @MainActor
 final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDelegate, NSMenuItemValidation {
     private let sidebar = SidebarViewController()
     private let documentPane = DocumentViewController()
     private let outline = OutlineViewController()
     private let terminalPanel = TerminalPanelController()
+    private let chatPanel = ChatPanelController()
     private let mainSplit = NSSplitViewController()
     private let centerSplit = NSSplitViewController()
     private var sidebarItem: NSSplitViewItem!
     private var outlineItem: NSSplitViewItem!
     private var terminalItem: NSSplitViewItem!
+    private var chatItem: NSSplitViewItem!
 
     private(set) var rootFolder: URL?
     private var watcher: FileWatcher?
@@ -71,9 +73,15 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
         outlineItem.maximumThickness = 360
         outlineItem.canCollapse = true
 
+        chatItem = NSSplitViewItem(inspectorWithViewController: chatPanel)
+        chatItem.minimumThickness = 260
+        chatItem.maximumThickness = 640
+        chatItem.canCollapse = true
+
         mainSplit.addSplitViewItem(sidebarItem)
         mainSplit.addSplitViewItem(NSSplitViewItem(viewController: centerSplit))
         mainSplit.addSplitViewItem(outlineItem)
+        mainSplit.addSplitViewItem(chatItem)
         window?.contentViewController = mainSplit
 
         // Panel sizes are remembered; which panels are open is restored below.
@@ -81,11 +89,17 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
         centerSplit.splitView.autosaveName = "CenterSplit"
         sidebarItem.isCollapsed = !Preferences.sidebarVisible
         outlineItem.isCollapsed = !Preferences.outlineVisible
+        chatItem.isCollapsed = !Preferences.chatVisible
         terminalItem.isCollapsed = true
 
         sidebar.onOpen = { [weak self] in self?.openFile($0) }
         outline.onSelect = { [weak self] in self?.documentPane.scrollTo(anchor: $0.id) }
         terminalPanel.onHide = { [weak self] in self?.setTerminalVisible(false) }
+        chatPanel.host = self
+        chatPanel.onHide = { [weak self] in self?.setChatVisible(false) }
+        chatPanel.onNeedsAttention = { [weak self] in
+            if self?.chatItem.isCollapsed == true { self?.setChatVisible(true) }
+        }
         documentPane.onStateChange = { [weak self] in self?.documentStateChanged() }
         documentPane.onOutline = { [weak self] in self?.outline.show($0) }
         documentPane.onLink = { [weak self] in self?.follow($0) }
@@ -274,6 +288,14 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
 
     func confirmQuit() -> Bool {
         guard confirmDiscardingEdits() else { return false }
+        if chatPanel.isWorking {
+            let alert = NSAlert()
+            alert.messageText = "Quit while Claude is working on your request?"
+            alert.informativeText = "Quitting stops it. Changes Claude already made stay in the document."
+            alert.addButton(withTitle: "Quit")
+            alert.addButton(withTitle: "Cancel")
+            guard alert.runModal() == .alertFirstButtonReturn else { return false }
+        }
         guard terminalPanel.isBusy else { return true }
         let alert = NSAlert()
         alert.messageText = "Quit while a program is running in the terminal?"
@@ -295,6 +317,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
     private func documentStateChanged() {
         updateTitle()
         updateToolbarStates()
+        chatPanel.documentChanged()
     }
 
     private func updateTitle() {
@@ -323,6 +346,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
         toolbarButtons[.edit]?.state = documentPane.mode == .split ? .on : .off
         toolbarButtons[.outline]?.state = outlineItem.isCollapsed ? .off : .on
         toolbarButtons[.terminal]?.state = terminalItem.isCollapsed ? .off : .on
+        toolbarButtons[.chat]?.state = chatItem.isCollapsed ? .off : .on
         toolbarButtons[.edit]?.isEnabled = documentPane.fileURL != nil
     }
 
@@ -339,6 +363,30 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
         Preferences.outlineVisible = visible
         updateToolbarStates()
     }
+
+    private func setChatVisible(_ visible: Bool) {
+        if visible, chatPanel.view.frame.width < 300 {
+            // First time open: room for a conversation, rather than the minimum width.
+            chatItem.isCollapsed = false
+            mainSplit.splitView.setPosition(mainSplit.splitView.bounds.width - 340, ofDividerAt: mainSplit.splitViewItems.count - 2)
+        }
+        chatItem.animator().isCollapsed = !visible
+        Preferences.chatVisible = visible
+        updateToolbarStates()
+        if visible {
+            chatPanel.focus()
+        } else if let window, let responder = window.firstResponder as? NSView, responder.isDescendant(of: chatPanel.view) {
+            window.makeFirstResponder(documentPane.view)
+        }
+    }
+
+    /// Ends the chat's Claude Code session (the app is quitting).
+    func endChat() {
+        chatPanel.endSession()
+    }
+
+    /// For the automation hook.
+    var chat: ChatPanelController { chatPanel }
 
     private func setTerminalVisible(_ visible: Bool) {
         if visible { terminalPanel.ensureShell(in: terminalFolder) }
@@ -393,6 +441,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
     @objc func toggleSidebarPanel(_ sender: Any?) { setSidebarVisible(sidebarItem.isCollapsed) }
     @objc func toggleOutline(_ sender: Any?) { setOutlineVisible(outlineItem.isCollapsed) }
     @objc func toggleTerminal(_ sender: Any?) { setTerminalVisible(terminalItem.isCollapsed) }
+    @objc func toggleChat(_ sender: Any?) { setChatVisible(chatItem.isCollapsed) }
 
     @objc func zoomIn(_ sender: Any?) { setZoom(Preferences.zoom + 0.1) }
     @objc func zoomOut(_ sender: Any?) { setZoom(Preferences.zoom - 0.1) }
@@ -484,6 +533,8 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
             item.title = outlineItem.isCollapsed ? "Show Outline" : "Hide Outline"
         case #selector(toggleTerminal(_:)):
             item.title = terminalItem.isCollapsed ? "Show Terminal" : "Hide Terminal"
+        case #selector(toggleChat(_:)):
+            item.title = chatItem.isCollapsed ? "Show Chat" : "Hide Chat"
         case #selector(toggleTrust(_:)):
             item.state = documentPane.isTrusted ? .on : .off
             // A file trusted through its folder is changed from Trusted Folders instead.
@@ -515,7 +566,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.sidebar, .sidebarTrackingSeparator, .flexibleSpace, .edit, .outline, .terminal]
+        [.sidebar, .sidebarTrackingSeparator, .flexibleSpace, .edit, .outline, .terminal, .chat]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -529,12 +580,14 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
         case .edit: spec = ("pencil", "Edit with Live Preview (⌘3)", #selector(toggleEditMode(_:)))
         case .outline: spec = ("list.bullet.indent", "Outline (⌃⌘O)", #selector(toggleOutline(_:)))
         case .terminal: spec = ("terminal", "Terminal (⌃`)", #selector(toggleTerminal(_:)))
+        case .chat: spec = ("text.bubble", "Chat (⌃⌘C)", #selector(toggleChat(_:)))
         default: return nil
         }
         let button = NSButton(image: NSImage(systemSymbolName: spec.symbol, accessibilityDescription: spec.label)!, target: self, action: spec.action)
         button.setButtonType(.pushOnPushOff)
         button.bezelStyle = .toolbar
         button.toolTip = spec.label
+        if identifier == .chat { button.image = ClaudeSymbol.image(size: 17) }
         toolbarButtons[identifier] = button
         let item = NSToolbarItem(itemIdentifier: identifier)
         item.view = button
@@ -553,9 +606,38 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
     }
 }
 
+// MARK: - Chat
+
+extension MainWindowController: ChatHost {
+    var chatDocument: URL? { documentPane.fileURL }
+
+    var chatFolder: URL { terminalFolder }
+
+    func saveDocumentForChat() -> Bool {
+        !documentPane.hasUnsavedEdits || documentPane.save()
+    }
+
+    func chatSelection() async -> String? {
+        await documentPane.selectionForChat()
+    }
+
+    func openChatLink(_ action: LinkAction) {
+        follow(action)
+    }
+
+    func runInTerminal(_ command: String) {
+        let justStarted = !terminalPanel.isShellRunning
+        // Don't let "Start Claude Code Automatically" type into the command.
+        if justStarted { terminalPanel.startShell(in: terminalFolder, startingClaude: false) }
+        setTerminalVisible(true)
+        terminalPanel.run(command, justStarted: justStarted)
+    }
+}
+
 private extension NSToolbarItem.Identifier {
     static let sidebar = Self("sidebar")
     static let edit = Self("edit")
     static let outline = Self("outline")
     static let terminal = Self("terminal")
+    static let chat = Self("chat")
 }

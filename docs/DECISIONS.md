@@ -109,3 +109,57 @@ confirms first, with a stronger warning for broad folders (home, Downloads,
 Desktop, Documents, iCloud Drive). Trusted folders are listed, and can be
 removed, under **View → Trusted Folders**. The matching rule (`TrustList`)
 is unit-tested so that `/a/project` never trusts `/a/project2`.
+
+## D-012 The chat runs Claude Code in its message mode — 2026-10-23
+
+The chat panel starts the user's own `claude` with `-p --input-format
+stream-json --output-format stream-json` and talks to it in JSON lines, with
+approvals over the same channel (`--permission-prompt-tool stdio`). See
+`docs/CHAT_DESIGN.md`.
+
+- **Why:** it is Claude Code itself, with the user's account, settings, skills
+  and CLAUDE.md, and it is the route Anthropic documents for driving Claude
+  Code from another language. VS Code's Claude panel uses the same flags. It
+  needs nothing new to build or run, in keeping with D-001 and D-008.
+- **Considered:** the Agent SDK in a Node helper (an official API, but it adds
+  Node and its own copy of Claude Code); the Claude API directly (needs an API
+  key and loses Claude Code's tools and settings); only the terminal (which
+  reads as a code tool, the reason for this work).
+- **Scope (owner's call):** a chat about the open document, not a code editor:
+  no file pickers, slash commands, model picker or diff views. The terminal
+  stays as it was.
+
+## D-013 Edits to the open document apply at once, with Undo — 2026-10-23
+
+Claude's requests to read or edit the open document are allowed without
+asking. Everything else (other files, commands, the web) asks Allow or Deny in
+a native banner, after the user's own permission rules. Before each message
+the app saves unsaved edits and keeps a copy of the document; Undo writes it
+back and tells Claude in the next message.
+
+- **Why:** changing the file easily is the point of the chat (owner). A change
+  the user sees and can undo needs no approval; anything beyond the document
+  does.
+- **Security:** the transcript page has no script message handlers (D-003), so
+  a reply can't approve anything or reach the app: Allow, Deny, Undo and the
+  message box are native. Replies are sanitized like documents, and remote
+  images are blocked, so a reply (or a document that steers it) can't carry
+  data out in an image URL.
+
+## D-014 The chat's symbol is the Claude symbol — 2026-10-23
+
+The toolbar button and the chat header show the Claude symbol
+(`web/claude-symbol.svg`, the artwork from Anthropic's VS Code extension), in
+Claude's orange. Owner's call. It is Anthropic's trademark: fine in the
+owner's own copy, but Anthropic's terms require written permission to use it
+in a published app. Before publishing, ask Anthropic or replace that one file
+with a neutral icon (without the file, the app falls back to a sparkle).
+
+## D-015 Child processes don't inherit a parent Claude Code session — 2026-10-23
+
+Launched from a Claude Code session (while developing it), the app inherits
+`CLAUDECODE` and `CLAUDE_CODE_*` variables, which make a child `claude` refuse
+to start or wait for its parent to refresh the login. The terminal and the
+chat now drop every `CLAUDE*` variable the app inherited; settings the user
+exports in their shell profile come back through the login shell. This
+extends D-005.

@@ -18,11 +18,9 @@ public enum ShellEnvironment {
 
     /// Environment for the terminal panel's shell, as `KEY=value` strings.
     public static func terminalEnvironment(from base: [String: String]) -> [String] {
-        var env = base
-        // Leftovers from however the app itself was launched. CLAUDECODE in
-        // particular makes Claude Code refuse to start ("nested session").
-        for key in ["CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT", "TERM_SESSION_ID", "TERM_PROGRAM_VERSION",
-                    "XPC_SERVICE_NAME", "__CFBundleIdentifier", "PWD", "OLDPWD", "SHLVL"] {
+        var env = withoutParentSession(base)
+        // Other leftovers from however the app itself was launched.
+        for key in ["TERM_SESSION_ID", "TERM_PROGRAM_VERSION", "XPC_SERVICE_NAME", "__CFBundleIdentifier", "PWD", "OLDPWD", "SHLVL"] {
             env.removeValue(forKey: key)
         }
         env["TERM"] = "xterm-256color"
@@ -45,6 +43,52 @@ public enum ShellEnvironment {
         return parseProbeOutput(output)
     }
 
+    /// Drops what a parent Claude Code session leaves in the environment when
+    /// it launched the app (while developing it, for example). CLAUDECODE makes
+    /// Claude Code refuse to start as a "nested" session, and the CLAUDE_CODE_*
+    /// settings make it wait for its parent to refresh the login. Settings the
+    /// user exports in their shell profile come back through the login shell.
+    public static func withoutParentSession(_ env: [String: String]) -> [String: String] {
+        env.filter { key, _ in key != "CLAUDECODE" && !key.hasPrefix("CLAUDE_") }
+    }
+
+    /// The environment a new Terminal window would have, from running the
+    /// user's login shell once (with the parent session's leftovers removed).
+    public static func loginEnvironment(shell: String = loginShell(), timeout: TimeInterval = 8) async -> [String: String]? {
+        let script = "printf '\\n\(probeMarker)\\n'; /usr/bin/env -0; printf '\\n\(probeMarker)\\n'"
+        let output = await runCapturingOutput(shell, ["-l", "-i", "-c", script], until: probeMarker, timeout: timeout)
+        return parseEnvironmentOutput(output)
+    }
+
+    /// Reads the `env -0` output between the two markers: entries end with a
+    /// NUL, so values may contain line breaks.
+    static func parseEnvironmentOutput(_ output: String) -> [String: String]? {
+        let parts = output.components(separatedBy: probeMarker)
+        guard parts.count >= 3 else { return nil }
+        var env: [String: String] = [:]
+        for entry in parts[1].split(separator: "\u{0}") {
+            let text = entry.hasPrefix("\n") ? entry.dropFirst() : entry
+            guard let equals = text.firstIndex(of: "="), equals != text.startIndex else { continue }
+            env[String(text[..<equals])] = String(text[text.index(after: equals)...])
+        }
+        return env.isEmpty ? nil : env
+    }
+
+    /// The first executable `name` on the environment's PATH, else in the
+    /// folders Claude Code's installers use (an older install is reached
+    /// through a shell alias, which the PATH doesn't show).
+    public static func findExecutable(_ name: String, in env: [String: String]) -> String? {
+        var candidates = (env["PATH"] ?? "").split(separator: ":").map { String($0) + "/" + name }
+        if let home = env["HOME"] {
+            candidates += [home + "/.local/bin/" + name, home + "/.claude/local/" + name]
+        }
+        return candidates.first { path in
+            var isDirectory: ObjCBool = false
+            return FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) && !isDirectory.boolValue
+                && FileManager.default.isExecutableFile(atPath: path)
+        }
+    }
+
     static let probeMarker = "__MDVIEWER_PROBE__"
 
     /// Takes the text between the two markers; shell startup files may print other text around it.
@@ -65,9 +109,8 @@ public enum ShellEnvironment {
             process.arguments = arguments
             process.standardInput = FileHandle.nullDevice
             process.standardError = FileHandle.nullDevice
-            var env = ProcessInfo.processInfo.environment
+            var env = withoutParentSession(ProcessInfo.processInfo.environment)
             env["TERM"] = "dumb"
-            env.removeValue(forKey: "CLAUDECODE")
             process.environment = env
 
             let pipe = Pipe()
@@ -132,3 +175,4 @@ private final class OutputCollector: @unchecked Sendable {
         return count
     }
 }
+

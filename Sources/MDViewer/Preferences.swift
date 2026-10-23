@@ -12,6 +12,7 @@ enum Preferences {
         static let sidebarVisible = "sidebarVisible"
         static let outlineVisible = "outlineVisible"
         static let terminalVisible = "terminalVisible"
+        static let chatVisible = "chatVisible"
         static let zoom = "zoom"
         static let trustedHTMLFiles = "trustedHTMLFiles"
         static let trustedFolders = "trustedFolders"
@@ -49,6 +50,11 @@ enum Preferences {
     static var terminalVisible: Bool {
         get { defaults.bool(forKey: Key.terminalVisible) }
         set { defaults.set(newValue, forKey: Key.terminalVisible) }
+    }
+
+    static var chatVisible: Bool {
+        get { defaults.bool(forKey: Key.chatVisible) }
+        set { defaults.set(newValue, forKey: Key.chatVisible) }
     }
 
     static var zoom: Double {

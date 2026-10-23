@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!--
+    Claude's replies are untrusted, like documents. Only the app's own scripts
+    may run, images come only from the app and the chat's folder (never the
+    internet, where a URL could carry data out), and nothing can make network
+    requests, embed frames or submit forms.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' mdv-app:; style-src 'self' mdv-app: 'unsafe-inline'; img-src 'self' mdv-app: mdv-file: data:; media-src 'none'; font-src 'self' mdv-app:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="color-scheme" content="light dark">
+  <title>Chat</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="vendor/hljs-light.min.css" media="(prefers-color-scheme: light)">
+  <link rel="stylesheet" href="vendor/hljs-dark.min.css" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+  <div id="empty">
+    <p class="title">Ask Claude about this document</p>
+    <p>Claude can change it for you: “Fix the typos”, “Make the introduction shorter”, “Add a summary at the top”.</p>
+    <p>Changes show in the document right away, and you can undo them.</p>
+  </div>
+  <main id="chat" aria-live="polite"></main>
+  <div id="status" hidden></div>
+  <script src="vendor/markdown-it.min.js"></script>
+  <script src="vendor/markdown-it-footnote.min.js"></script>
+  <script src="vendor/highlight.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script src="render.js"></script>
+  <script src="chat.js"></script>
+  <script src="chat-page.js"></script>
+</body>
+</html>

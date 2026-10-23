@@ -480,6 +480,13 @@ final class DocumentViewController: NSViewController {
         return await previewSelection()
     }
 
+    /// The selected text for the chat, wherever the user selected it: in the
+    /// editor when it is shown, else in the preview.
+    func selectionForChat() async -> String? {
+        if mode != .preview, let text = editor.selectedText() { return text }
+        return mode == .source ? nil : await previewSelection()
+    }
+
     private func previewSelection() async -> String? {
         switch kind {
         case .markdown: await markdown.selectedText()

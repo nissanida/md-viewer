@@ -46,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSMenu
 
     func applicationWillTerminate(_ notification: Notification) {
         windowController.saveSession()
+        windowController.endChat()
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }

@@ -1,0 +1,135 @@
+/* MD Viewer chat: a narrow transcript beside the document, on the preview's palette (style.css). */
+
+body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  padding: 14px 14px 20px;
+}
+
+#chat > .item { margin-top: 0; margin-bottom: 10px; }
+
+/* The user's messages: a bubble on the right. Its text picks its own direction. */
+
+#chat > .item.user {
+  margin-left: auto; /* physical, so a Hebrew message stays on the right as well */
+  margin-right: 0;
+  width: fit-content;
+  max-width: 88%;
+  padding: 7px 11px;
+  border-radius: 12px;
+  background: var(--code-bg);
+}
+.item.user .text { white-space: pre-wrap; }
+.item.user .quote {
+  margin: 0 0 5px;
+  padding: 0;
+  padding-inline-start: 8px;
+  border-inline-start: 2px solid var(--border-strong);
+  color: var(--muted);
+  font-size: 12px;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Claude's replies: plain markdown, a little smaller than in documents. */
+
+.item.assistant p, .item.assistant ul, .item.assistant ol, .item.assistant pre,
+.item.assistant table, .item.assistant blockquote { margin-bottom: 0.6em; }
+.item.assistant > :last-child { margin-bottom: 0; }
+.item.assistant h1, .item.assistant h2, .item.assistant h3,
+.item.assistant h4, .item.assistant h5, .item.assistant h6 { margin: 0.9em 0 0.4em; }
+.item.assistant h1 { font-size: 1.3em; }
+.item.assistant h2 { font-size: 1.18em; }
+.item.assistant h3, .item.assistant h4 { font-size: 1.05em; }
+.item.assistant pre { font-size: 12px; padding: 9px 12px; border-radius: 8px; }
+.item.assistant table { font-size: 0.92em; }
+.item.assistant.streaming::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+  animation: mdv-pulse 1s ease-in-out infinite;
+}
+
+/* Tool steps: one quiet line each. */
+
+#chat > .item.step {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.item.step .marker { flex: none; width: 11px; text-align: center; }
+.item.step .label, .item.step code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* When the line is too long, the command gives way before the description. */
+.item.step .label { flex: 0 0 auto; max-width: 75%; }
+.item.step code { flex: 0 1 auto; font-size: 11.5px; direction: ltr; }
+.item.step .state { flex: none; font-style: italic; }
+.item.step.state-done .marker::before { content: "✓"; color: var(--alert-tip); }
+.item.step.state-failed .marker::before { content: "✕"; color: var(--alert-caution); }
+.item.step.state-failed .state { color: var(--alert-caution); }
+.item.step.state-denied .marker::before { content: "⊘"; }
+.item.step.state-stopped .marker::before { content: "■"; font-size: 8px; }
+.item.step.state-running .marker::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--faint);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: mdv-spin 0.8s linear infinite;
+}
+
+/* Notices */
+
+.item.notice { font-size: 12px; padding: 6px 10px; border-radius: 8px; }
+.item.notice.tone-info { color: var(--muted); text-align: center; }
+.item.notice.tone-error {
+  color: var(--alert-caution);
+  background: color-mix(in srgb, var(--alert-caution) 9%, transparent);
+}
+
+/* What Claude is doing right now */
+
+#status { font-size: 12px; color: var(--muted); }
+#status::after { content: ""; animation: mdv-dots 1.2s steps(4) infinite; }
+
+/* Before the first message */
+
+#empty {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+#empty[hidden] { display: none; }
+#empty p { margin: 0 0 0.6em; }
+#empty .title { font-size: 14px; font-weight: 600; color: var(--fg); }
+
+@keyframes mdv-spin { to { transform: rotate(360deg); } }
+@keyframes mdv-pulse { 50% { opacity: 0.25; } }
+@keyframes mdv-dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+}

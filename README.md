@@ -1,8 +1,9 @@
 # MD Viewer
 
 A calm macOS app for reading and lightly editing markdown, viewing HTML, and
-running Claude Code next to the document. Native (Swift + AppKit), about 8 MB,
-starts in half a second, and free and open source all the way down.
+asking Claude to change the document in a chat beside it (or running Claude
+Code in a terminal). Native (Swift + AppKit), about 8 MB, starts in half a
+second, and free and open source all the way down.
 
 ## Install
 
@@ -66,7 +67,7 @@ you ask for it.
 | Toggle source view | ⌘/ |
 | Save | ⌘S |
 | Find, next, previous | ⌘F, ⌘G, ⇧⌘G |
-| Sidebar / Outline / Terminal | ⌃⌘S / ⌃⌘O / ⌃` |
+| Sidebar / Outline / Terminal / Chat | ⌃⌘S / ⌃⌘O / ⌃` / ⌃⌘C |
 | Start Claude Code | ⌃⇧` |
 | Send file path / selection to the terminal | ⌥⌘P / ⌥⌘J |
 | Zoom in / out / actual size | ⌘= / ⌘- / ⌘0 |
@@ -84,6 +85,27 @@ you ask for it.
   right to left automatically.
 - **Your place is remembered:** the last folder and file, window size, view
   mode and which panels are open.
+
+### Chat with Claude
+
+The chat panel (⌃⌘C, or the Claude button in the toolbar) is the easy way to
+change a document: write what you want ("make the intro shorter", "fix the
+typos", "turn this list into a table") and watch the document change. It runs
+your own Claude Code underneath, with your account, settings, skills and
+CLAUDE.md, in the same folder the terminal uses.
+
+- Claude gets the open document and any text you selected, so you never type
+  file names.
+- Edits to the open document happen right away. **Undo** puts the file back as
+  it was before Claude's last change. Anything else, such as other files or
+  commands, asks **Allow** or **Deny** first.
+- Replies are formatted, with Hebrew and Arabic reading right to left. Each
+  step Claude takes shows as one short line.
+- **Return** sends and **Shift+Return** starts a new line. **Stop** ends a
+  request, and **New Chat** (in the panel's header) starts over.
+- Unsaved edits are saved before a message is sent, so Claude works on what
+  you see.
+- If Claude Code isn't installed or signed in, the panel says what to do.
 
 ### Terminal and Claude Code
 
@@ -126,6 +148,11 @@ Folders**, takes it back.
   has no way to run commands or type into the terminal.
 - Local images are served only if they are images, audio or video, so a
   document can't pull other files into the page.
+- The chat's transcript is a display-only page like the previews: Claude's
+  replies are sanitized, can't call the app, and can't load remote images.
+  Allow, Deny and Undo are native buttons. Only the open document is edited
+  without asking, and that edit can be undone. MD Viewer never sees your
+  Claude login; Claude Code handles it.
 
 ## Development
 
@@ -144,9 +171,9 @@ code signing rejects).
 | --- | --- |
 | `Sources/MDViewer/` | The app: window, sidebar, previews, editor, terminal, menus |
 | `Sources/MDViewerCore/` | Logic without UI: file watching, folder listing, links, shell lookup |
-| `web/` | The preview page: `render.js` (markdown pipeline), `page.js`, `style.css`, `vendor/` libraries |
+| `web/` | The preview page: `render.js` (markdown pipeline), `page.js`, `style.css`, `vendor/` libraries; the chat's transcript page: `chat.html`, `chat.js`, `chat-page.js`, `chat.css` |
 | `packaging/` | `Info.plist` (file types), app icon, `mdviewer` script |
-| `scripts/` | App build, icon, vendoring, and the automation helper |
+| `scripts/` | App build, icon, vendoring, the automation helper, and a stand-in for `claude` (`fake-claude.py`) |
 | `Tests/` | Swift tests (`MDViewerCoreTests`) and rendering tests (`web/`) |
 
 The JavaScript libraries are pinned in `scripts/update-vendor.sh` and committed
@@ -162,6 +189,13 @@ swiftc scripts/automate.swift -o /tmp/automate
 open --env MDV_AUTOMATION=1 -a "/Applications/MD Viewer.app" README.md
 /tmp/automate "snapshot /tmp/window.png"
 ```
+
+The chat can be driven the same way (`chat-send`, `chat-type`, `chat-stop`,
+`chat-new`, `chat-state <file.json>`). With automation on, `MDV_CLAUDE_PATH`
+swaps `claude` for `scripts/fake-claude.py`, which answers without an account
+(it can edit the document, ask for approval, write slowly or act signed out),
+and `MDV_CLAUDE_MODEL` picks a cheaper model for live tests. Keep the stand-in
+outside iCloud Drive when testing, or macOS asks for folder access first.
 
 ## Notarization (later)
 
