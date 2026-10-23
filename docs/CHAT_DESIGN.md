@@ -1,6 +1,6 @@
 # Document chat: design
 
-**Status:** built on branch `feature/document-chat` (2026-10-23), tested with a
+**Status:** merged into `main` (2026-10-23), tested with a
 stand-in for Claude Code and live with real Claude.
 
 ## Goal

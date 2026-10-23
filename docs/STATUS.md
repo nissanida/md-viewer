@@ -5,11 +5,10 @@ installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
 The code is committed locally on `main`, with no remote yet. **Next:**
 [publish to GitHub](#next-publish-to-github).
 
-The [document chat](#document-chat-branch-featuredocument-chat) is built on the
-branch `feature/document-chat` and tested live with real Claude; not merged
-into `main` yet. The installed app is built from that branch.
+The [document chat](#document-chat) is merged into `main`, tested live with
+real Claude, and installed.
 
-## Document chat (branch `feature/document-chat`)
+## Document chat
 
 A chat panel on the right (⌃⌘C, or the Claude button in the toolbar) for
 changing the open document in plain words. Design: `docs/CHAT_DESIGN.md`;
@@ -101,8 +100,8 @@ the repository name. Recommended: public, source only, named `md-viewer`.
    `git rebase -r --root --exec 'git commit --amend --no-edit --reset-author'`.
 4. Keep it source-only: no app downloads. A downloaded build would be blocked
    by Gatekeeper unless notarized (see README, "Notarization").
-5. If the chat branch is merged first: decide on the Claude symbol (D-014).
-   Ask Anthropic, or replace `web/claude-symbol.svg` with a neutral icon.
+5. Decide on the Claude symbol (D-014): ask Anthropic, or replace
+   `web/claude-symbol.svg` with a neutral icon.
 
 **Publish:** `gh repo create <name> --public --source . --remote origin --push`
 (or `--private`). Then check the repository page and add the URL and date to
@@ -127,6 +126,8 @@ syntax colors in the editor, tabs or multiple windows.
   box (owner's request), fixed the transcript not following new messages when
   a notice opened under it, tested live with real Claude, and installed the
   chat build in `/Applications`.
+- **2026-10-23:** merged the document chat (`feature/document-chat`) into
+  `main`.
 - **2026-10-23:** restyled the model and effort choices as pill buttons named
   for the model behind them, and in Auto mode moved Undo to a small button in
   the chat's header (both at the owner's request); reinstalled.
