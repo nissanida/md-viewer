@@ -2,6 +2,8 @@
 
 **As of 2026-10-23:** all features in the brief are built. Version 0.1.0 is
 installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
+The code is committed locally on `main`, with no remote yet. **Next:**
+[publish to GitHub](#next-publish-to-github).
 
 ## What was tested, and how
 
@@ -48,6 +50,36 @@ installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
   Documents or iCloud Drive (an ad-hoc signed app gets a new identity per
   build).
 
+## Next: publish to GitHub
+
+The owner will publish the source in a new session. Nothing has been pushed;
+there is no remote. The GitHub CLI is installed and signed in as `nissanida`.
+
+**Ask the owner first** (publishing is outward-facing): public or private, and
+the repository name. Recommended: public, source only, named `md-viewer`.
+
+**Before the first push:**
+1. Add a `LICENSE` file (MIT recommended; confirm the copyright holder's name
+   with the owner).
+2. Replace the Hebrew personal name `דניאל` in
+   `Tests/MDViewerCoreTests/CoreTests.swift` (line 52, a sample folder name)
+   with a neutral word such as `מסמכים`, and rerun `make test`.
+3. Hide the personal email in commits. Look up the account's GitHub no-reply
+   address (`gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"'`),
+   set it for this repository only (`git config user.email <address>`), then
+   rewrite the existing commits' author:
+   `git rebase -r --root --exec 'git commit --amend --no-edit --reset-author'`.
+4. Keep it source-only: no app downloads. A downloaded build would be blocked
+   by Gatekeeper unless notarized (see README, "Notarization").
+
+**Publish:** `gh repo create <name> --public --source . --remote origin --push`
+(or `--private`). Then check the repository page and add the URL and date to
+the log below.
+
+Good to know: the folder is in iCloud Drive, so the GitHub copy also serves as
+the backup. Build products and caches live in `~/Library/Caches/md_html_reader`
+and never enter git.
+
 ## Ideas, not started
 
 Mermaid diagrams and math, scroll sync between editor and preview, markdown
@@ -55,6 +87,8 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-10-23:** committed everything locally (`main`), and logged the steps
+  to publish on GitHub in a new session.
 - **2026-10-23:** the terminal now starts in the open folder (project root),
   not the file's subfolder.
 - **2026-10-23:** added Trust Folder for HTML (the sidebar's folder) and
