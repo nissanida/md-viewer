@@ -34,6 +34,11 @@ window, working in the folder where it started; long tool steps are cut short
 to one line; a new model, effort or mode applies from the next message (Claude
 Code restarts in the same conversation, which takes a second or two).
 
+**Known bug (found 2026-10-24, not fixed yet):** while a notice shows above the
+message box (Keep/Undo, Allow/Deny), its tinted background can paint over the
+chat's header. `ChatNoticeView.draw` fills the dirty rect, which since macOS 14
+can be larger than the view.
+
 ## What was tested, and how
 
 | Area | How | Result |
@@ -130,6 +135,11 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-10-24:** added two screenshots at the top of the README (owner's OK):
+  a document in light mode with the sidebar, and the chat panel in dark mode
+  (`docs/images/`). Taken from the public build in a test copy, with a sample
+  project in `/tmp` and the chat answered by the stand-in; checked for personal
+  data. Found on the way: the chat notice bug above.
 - **2026-10-24:** published on GitHub (owner's go):
   <https://github.com/nissanida/md-viewer>, release v0.1.0 with the download.
   Before that, removed the Mac's user name from release builds (build folders

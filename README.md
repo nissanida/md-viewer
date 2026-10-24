@@ -5,6 +5,10 @@ asking Claude to change the document in a chat beside it (or running Claude
 Code in a terminal). Native (Swift + AppKit), about 8 MB, starts in half a
 second, and free and open source all the way down.
 
+![A markdown document in MD Viewer: a table, a checklist, highlighted code and a line of Hebrew read right to left, with the folder's files in the sidebar](docs/images/preview-light.png)
+
+![The chat panel beside the document, in dark mode: Claude added a Hebrew summary and turned a list into a table](docs/images/chat-dark.png)
+
 ## Install
 
 MD Viewer runs on macOS 14 or later, on Apple Silicon and Intel Macs. Download
