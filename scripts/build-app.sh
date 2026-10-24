@@ -26,6 +26,9 @@ echo "==> Assembling $APP"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 lipo -create "${binaries[@]}" -output "$APP/Contents/MacOS/MDViewer"
+# Drop the debug map: it lists the folders the app was built in, which include
+# the builder's user name. Function names stay, so crash reports still read.
+strip -S "$APP/Contents/MacOS/MDViewer"
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$(date +%Y%m%d%H%M)/" \
   "$ROOT/packaging/Info.plist" > "$APP/Contents/Info.plist"
 copy() { ditto --norsrc --noextattr --noqtn "$1" "$2"; } # without Finder/iCloud metadata

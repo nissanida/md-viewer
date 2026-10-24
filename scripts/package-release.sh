@@ -31,6 +31,10 @@ if [[ -e "$APP/Contents/Resources/web/claude-symbol.svg" ]]; then
   echo "The Claude symbol is in the app, and it must not ship (D-014)." >&2
   exit 1
 fi
+if grep -r -a -q -F "$HOME" "$APP"; then
+  echo "The app contains a path from this Mac ($HOME), which would publish your user name." >&2
+  exit 1
+fi
 codesign --verify --deep --strict "$APP"
 
 rm -f "$ZIP"

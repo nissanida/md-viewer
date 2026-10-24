@@ -22,13 +22,18 @@ struct OutlineItem: Equatable {
 /// web/ folder when running from source with `swift run`.
 enum AppResources {
     static let webRoot: URL = {
-        if let bundled = Bundle.main.resourceURL?.appending(path: "web"),
-           FileManager.default.fileExists(atPath: bundled.appending(path: "index.html").path(percentEncoded: false)) {
+        let bundled = Bundle.main.resourceURL?.appending(path: "web")
+        if let bundled, FileManager.default.fileExists(atPath: bundled.appending(path: "index.html").path(percentEncoded: false)) {
             return bundled
         }
+        #if DEBUG
         return URL(fileURLWithPath: #filePath) // Sources/MDViewer/Previews.swift
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
             .appending(path: "web")
+        #else
+        // #filePath would put the builder's folder (and user name) into the app.
+        return bundled ?? Bundle.main.bundleURL.appending(path: "Contents/Resources/web")
+        #endif
     }()
 }
 

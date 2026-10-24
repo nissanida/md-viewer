@@ -210,4 +210,5 @@ source only.
 - **How:** `make zip` builds the zip from the committed code (`git archive`),
   never from the working folder, so files kept only in the owner's copy, such
   as the Claude symbol (D-014), can't ship by accident. It stops if the symbol
-  is in the app anyway.
+  is in the app anyway, or if the app holds a path from the Mac that built it
+  (that path includes the user name).

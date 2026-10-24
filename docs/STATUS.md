@@ -94,13 +94,22 @@ call). There is no remote yet. The owner's choices: public, named
 - The tests no longer use a personal name as a folder name.
 - README install steps for both ways, and `make zip` for the download.
   Tested: universal, 3.1 MB, signature valid after unzipping, no Claude symbol.
+- The app no longer carries the Mac's user name. Release builds held it in
+  the folder paths of their debug info and in one source path (`#filePath`);
+  `build-app.sh` now strips the debug info (function names stay, for crash
+  reports), the source path is debug-only, and `make zip` stops if the app
+  contains a path from the Mac that built it.
+- Every commit and file version was searched for personal data and secrets:
+  only the known email and the Claude symbol were found.
 
 **Left, when the owner says go:**
 1. Rewrite the six older commits, which still carry the personal email and
    the Claude symbol: swap in the no-reply address and drop the symbol file,
    keeping messages, dates and code. It needs the owner's explicit yes,
-   because Claude Code's safety check blocks history rewrites. Back up
-   `web/claude-symbol.svg` first: the rewrite deletes it from the folder.
+   because Claude Code's safety check blocks history rewrites. Tried on a
+   copy (2026-10-24): same commits, code, dates and messages; only no-reply
+   emails; no symbol anywhere. The symbol stayed in the folder, but back up
+   `web/claude-symbol.svg` first anyway.
 2. `gh repo create md-viewer --public --source . --remote origin --push`.
 3. `make zip`, then publish the zip as release v0.1.0 (steps below).
 4. Check the repository page, and add the URL and date to the log.
@@ -125,6 +134,10 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-10-24:** before publishing, found the Mac's user name inside the app
+  (build folders in its debug info, one source path) and removed it from
+  release builds; `make zip` now refuses a build that has it. Tried the
+  history rewrite on a copy. Still waiting for the owner's go.
 - **2026-10-24:** prepared publishing on GitHub (license, install steps for a
   download and for building, `make zip`, the Claude symbol out of git, a
   neutral test folder name); paused before the history rewrite and the first
