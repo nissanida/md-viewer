@@ -2,8 +2,8 @@
 
 **As of 2026-10-24:** all features in the brief are built. Version 0.1.0 is
 installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
-Publishing to GitHub is prepared but paused, with nothing pushed (owner's
-call): see [Publishing to GitHub](#publishing-to-github).
+It is public on GitHub, <https://github.com/nissanida/md-viewer>, with the
+download in release v0.1.0: see [Publishing to GitHub](#publishing-to-github).
 
 The [document chat](#document-chat) is merged into `main`, tested live with
 real Claude, and installed.
@@ -81,38 +81,31 @@ Code restarts in the same conversation, which takes a second or two).
 
 ## Publishing to GitHub
 
-Prepared on 2026-10-24, then paused before anything was pushed (owner's
-call). There is no remote yet. The owner's choices: public, named
+Published on 2026-10-24: <https://github.com/nissanida/md-viewer>, public,
+MIT license (Daniel Nissani). Release
+[v0.1.0](https://github.com/nissanida/md-viewer/releases/tag/v0.1.0) holds
+the download, `MD-Viewer-0.1.0.zip` (universal, 3.0 MB); GitHub's copy has
+the same SHA-256 as the one built here. The owner's choices: public, named
 `md-viewer`, MIT license, and both a download and build steps (D-017).
 
-**Done, committed here:**
-- `LICENSE` (MIT, Daniel Nissani).
-- New commits here use GitHub's no-reply address instead of the personal
-  email (set in this repository's `.git/config`).
+**Everything pushed is public.** What keeps personal data out:
+- Commits here use GitHub's no-reply address, not the personal email (set in
+  this repository's `.git/config`).
 - The Claude symbol stays in this folder only (D-014): it is listed in
-  `.gitignore` and no longer tracked.
-- The tests no longer use a personal name as a folder name.
-- README install steps for both ways, and `make zip` for the download.
-  Tested: universal, 3.1 MB, signature valid after unzipping, no Claude symbol.
-- The app no longer carries the Mac's user name. Release builds held it in
-  the folder paths of their debug info and in one source path (`#filePath`);
-  `build-app.sh` now strips the debug info (function names stay, for crash
-  reports), the source path is debug-only, and `make zip` stops if the app
-  contains a path from the Mac that built it.
-- Every commit and file version was searched for personal data and secrets:
-  only the known email and the Claude symbol were found.
+  `.gitignore` and never tracked.
+- `make zip` stops if the app holds the Claude symbol or a path from the Mac
+  that built it (the path includes the user name). `build-app.sh` strips the
+  debug info, which lists the build folders; function names stay, for crash
+  reports.
 
-**Left, when the owner says go:**
-1. Rewrite the six older commits, which still carry the personal email and
-   the Claude symbol: swap in the no-reply address and drop the symbol file,
-   keeping messages, dates and code. It needs the owner's explicit yes,
-   because Claude Code's safety check blocks history rewrites. Tried on a
-   copy (2026-10-24): same commits, code, dates and messages; only no-reply
-   emails; no symbol anywhere. The symbol stayed in the folder, but back up
-   `web/claude-symbol.svg` first anyway.
-2. `gh repo create md-viewer --public --source . --remote origin --push`.
-3. `make zip`, then publish the zip as release v0.1.0 (steps below).
-4. Check the repository page, and add the URL and date to the log.
+**Before the first push:** every commit and file version was searched for
+personal data and secrets. The six older commits carried the personal email
+and the Claude symbol, so the history was rewritten (no-reply address, no
+symbol), keeping commits, code, dates and messages. A backup of the history
+from before the rewrite is in
+`~/Library/Caches/md_html_reader/pre-rewrite-backup/`; it can be deleted.
+Public by the owner's choice: the full name in `LICENSE`, the handle
+`nissanida`, and the Hebrew first name in a few lines of old tests and docs.
 
 **To publish a new version:**
 1. Raise `VERSION` in the `Makefile`, run `make test`, then commit and push.
@@ -125,7 +118,10 @@ call). There is no remote yet. The owner's choices: public, named
 
 Good to know: the folder is in iCloud Drive, so the GitHub copy also serves as
 the backup. Build products and caches live in `~/Library/Caches/md_html_reader`
-and never enter git.
+and never enter git. Git here has no GitHub login of its own: push with
+`git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push`
+(or run `gh auth setup-git` once). A push over 1 MiB failed with HTTP 400 and
+went through with `-c http.postBuffer=157286400` added.
 
 ## Ideas, not started
 
@@ -134,10 +130,12 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
-- **2026-10-24:** before publishing, found the Mac's user name inside the app
-  (build folders in its debug info, one source path) and removed it from
-  release builds; `make zip` now refuses a build that has it. Tried the
-  history rewrite on a copy. Still waiting for the owner's go.
+- **2026-10-24:** published on GitHub (owner's go):
+  <https://github.com/nissanida/md-viewer>, release v0.1.0 with the download.
+  Before that, removed the Mac's user name from release builds (build folders
+  in the debug info, one source path; `make zip` now refuses a build that has
+  it) and rewrote the history without the personal email and the Claude
+  symbol.
 - **2026-10-24:** prepared publishing on GitHub (license, install steps for a
   download and for building, `make zip`, the Claude symbol out of git, a
   neutral test folder name); paused before the history rewrite and the first

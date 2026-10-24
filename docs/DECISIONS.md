@@ -157,8 +157,8 @@ with a neutral icon (without the file, the app falls back to a sparkle).
 
 **For publishing (2026-10-24, owner's call):** the file stays in the owner's
 copy only. It is listed in `.gitignore` and no longer tracked, so the
-download and anyone's own build show the sparkle. Older commits still hold it,
-so it must be removed from the history before the first push. Considered: the
+download and anyone's own build show the sparkle. Older commits held it, so
+it was removed from the history before the first push. Considered: the
 sparkle for the owner too, or waiting for Anthropic's permission.
 
 ## D-015 Child processes don't inherit a parent Claude Code session — 2026-10-23
