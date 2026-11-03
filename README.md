@@ -7,36 +7,76 @@ second, and free and open source all the way down.
 
 ![A markdown document in MD Viewer: a table, a checklist, highlighted code and a line of Hebrew read right to left, with the folder's files in the sidebar](docs/images/preview-light.png)
 
-![The chat panel beside the document, in dark mode: Claude added a Hebrew summary and turned a list into a table](docs/images/chat-dark.png)
-
 ## Install
 
-MD Viewer runs on macOS 14 or later, on Apple Silicon and Intel Macs.
+MD Viewer needs macOS 14 or later, on an Apple Silicon or Intel Mac. Pick one
+of three ways; the first is the easiest.
 
-### Download the app
+### 1. One line in Terminal (recommended)
 
-1. Download the `.zip` file from the
-   [latest release](https://github.com/nissanida/md-viewer/releases/latest),
-   and open it to unzip.
-2. Drag **MD Viewer** into your **Applications** folder.
-3. Open it. The first time, macOS blocks it, because the app isn't notarized
-   by Apple (see [Notarization](#notarization-later)). Close the warning, open
-   **System Settings → Privacy & Security**, scroll down, click **Open
-   Anyway** next to MD Viewer, and confirm. You do this once per Mac.
+1. Open **Terminal**: press ⌘ Space, type `Terminal`, press Return.
+2. Paste this line and press Return:
 
-On macOS 14, right-clicking the app and choosing **Open** also works (macOS 15
-removed that shortcut). Or, in Terminal:
-`xattr -dr com.apple.quarantine "/Applications/MD Viewer.app"`.
+   ```bash
+   curl -fsSL https://github.com/nissanida/md-viewer/releases/latest/download/MD-Viewer.zip -o /tmp/MD-Viewer.zip && rm -rf "/Applications/MD Viewer.app" && ditto -x -k /tmp/MD-Viewer.zip /Applications && rm /tmp/MD-Viewer.zip && open -a "MD Viewer"
+   ```
 
-Optional command-line helper (`mdviewer README.md`, `mdviewer docs/`, or just
-`mdviewer` for the current folder), once the app is in Applications:
+3. MD Viewer opens. It is now in your **Applications** folder like any other
+   app, so you can keep it in the Dock, find it with Spotlight, and use it
+   from Finder's **Open With**.
 
-```bash
-sudo ln -sf "/Applications/MD Viewer.app/Contents/Resources/mdviewer" /usr/local/bin/mdviewer
+To update later, run the same line again. It replaces the old app.
+
+Why Terminal? Apps downloaded in a browser are blocked the first time unless
+the developer pays Apple USD 99 a year (see [Notarization](#notarization-later)).
+Files downloaded by Terminal aren't marked that way, so this route has no
+warning and no extra clicks.
+
+### 2. Let Claude Code or Codex install it
+
+Paste this into Claude Code or Codex:
+
+```text
+Install MD Viewer (https://github.com/nissanida/md-viewer) on this Mac.
+It needs macOS 14 or later; check with `sw_vers -productVersion` first.
+Run this command exactly as written (it downloads the app from the project's
+latest GitHub release and puts it in /Applications):
+
+curl -fsSL https://github.com/nissanida/md-viewer/releases/latest/download/MD-Viewer.zip -o /tmp/MD-Viewer.zip && rm -rf "/Applications/MD Viewer.app" && ditto -x -k /tmp/MD-Viewer.zip /Applications && rm /tmp/MD-Viewer.zip && open -a "MD Viewer"
+
+Then run `codesign --verify --deep "/Applications/MD Viewer.app"` and tell me
+whether the app opened and the check passed. Don't change anything else on my Mac.
 ```
 
-To uninstall, drag **MD Viewer** to the Trash and delete that link
-(`sudo rm /usr/local/bin/mdviewer`).
+### 3. Download by hand
+
+1. Download `MD-Viewer.zip` from the
+   [latest release](https://github.com/nissanida/md-viewer/releases/latest)
+   (under **Assets**), and double-click it to unzip.
+2. Drag **MD Viewer** into your **Applications** folder.
+3. Double-click **MD Viewer** in Applications. macOS says it can't verify the
+   app. Click **Done** (not Move to Trash).
+4. Open **System Settings → Privacy & Security** and scroll down to the
+   message about MD Viewer. Click **Open Anyway**, then enter your password or
+   Touch ID, and click **Open Anyway** once more.
+
+You do this once per Mac. On macOS 14, right-clicking the app and choosing
+**Open** also works. If macOS says the app is "damaged", paste this in
+Terminal and open the app again:
+`xattr -dr com.apple.quarantine "/Applications/MD Viewer.app"`.
+
+### Command-line helper and uninstall
+
+Optional: the `mdviewer` command opens files or folders from Terminal
+(`mdviewer README.md`, `mdviewer docs/`, or just `mdviewer` for the current
+folder). Once the app is in Applications:
+
+```bash
+sudo mkdir -p /usr/local/bin && sudo ln -sf "/Applications/MD Viewer.app/Contents/Resources/mdviewer" /usr/local/bin/mdviewer
+```
+
+To uninstall, drag **MD Viewer** to the Trash, and delete the command with
+`sudo rm /usr/local/bin/mdviewer`.
 
 ### Make it the default for markdown (or HTML)
 

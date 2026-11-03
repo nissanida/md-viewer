@@ -227,3 +227,25 @@ the install on another Mac and finding it did not go well.
 - **Still open:** what exactly went wrong on the other Mac was not recorded.
   The first-launch warning (the app isn't notarized, D-017) is the likeliest
   cause; notarizing needs a paid Apple Developer account.
+
+## D-019 Terminal line is the main install; one README image — 2026-11-03
+
+Owner's call, after the download needed several clicks on another Mac and
+free options were checked (no way around Apple's USD 99 a year for a plain
+double-click).
+
+- **Install options in the README:** (1) one line in Terminal, which
+  downloads the zip with `curl` and unzips it with `ditto` into
+  `/Applications`; files fetched this way carry no quarantine mark, so macOS
+  shows no warning. (2) A prompt to paste into Claude Code or Codex that runs
+  the same line and checks the signature. (3) The browser download with the
+  Open Anyway steps, as a fallback. Homebrew was left out for now.
+- **A fixed download name:** the release file is `MD-Viewer.zip`, without the
+  version, so the line can use `releases/latest/download/MD-Viewer.zip`. The
+  version is the release tag.
+- **One image** at the top of the README (the document with the sidebar); the
+  chat screenshot was removed.
+- **Not verified:** that the line opens the app without a warning on a second
+  Mac. Checked here: the extracted app passes `codesign` and has no
+  quarantine mark.
+

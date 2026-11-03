@@ -45,6 +45,12 @@ enum DevAutomation {
             // window) doesn't exist while another app is in front.
             let selector = NSSelectorFromString(argument)
             NSApp.sendAction(selector, to: windowController.responds(to: selector) ? windowController : nil, from: nil)
+        case "full-screen": windowController.window?.toggleFullScreen(nil)
+        case "close-window": windowController.window?.performClose(nil) // the red button
+        case "window-state": // "visible fullscreen" flags, written to the file
+            let window = windowController.window
+            let state = "visible=\(window?.isVisible == true) fullscreen=\(window?.styleMask.contains(.fullScreen) == true)"
+            try? state.write(to: URL(fileURLWithPath: argument), atomically: true, encoding: .utf8)
         case "open": windowController.open([URL(fileURLWithPath: argument)])
         case "export-pdf": windowController.exportPDF(to: URL(fileURLWithPath: argument))
         case "editor-insert": // types into the source editor (only when it has focus)

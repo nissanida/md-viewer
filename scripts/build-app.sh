@@ -10,7 +10,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-$HOME/Library/Caches/md_html_reader}"
 ARCHS="${ARCHS:-arm64 x86_64}"
-VERSION="${VERSION:-0.1.0}"
+VERSION="${VERSION:-0.1.1}"
 APP="$BUILD_DIR/dist/MD Viewer.app"
 
 binaries=()

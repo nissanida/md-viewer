@@ -24,6 +24,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
     /// The open file's path as FSEvents reports it, kept so a deletion can still be matched.
     private var watchedFilePath: String?
     private var toolbarButtons: [NSToolbarItem.Identifier: NSButton] = [:]
+    private var hideAfterLeavingFullScreen = false
 
     init() {
         let window = NSWindow(
@@ -308,8 +309,21 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSToolba
     /// Closing the window only hides it, so the terminal session keeps running.
     /// Click the Dock icon to bring it back.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        sender.orderOut(nil)
+        // Hiding a full-screen window leaves its empty Space behind: a black
+        // screen that only a force quit removes. Leave full screen first.
+        if sender.styleMask.contains(.fullScreen) {
+            hideAfterLeavingFullScreen = true
+            sender.toggleFullScreen(nil)
+        } else {
+            sender.orderOut(nil)
+        }
         return false
+    }
+
+    func windowDidExitFullScreen(_ notification: Notification) {
+        guard hideAfterLeavingFullScreen else { return }
+        hideAfterLeavingFullScreen = false
+        window?.orderOut(nil)
     }
 
     // MARK: Title and toolbar state

@@ -1,16 +1,17 @@
 #!/bin/bash
-# Builds the download for a GitHub release, MD-Viewer-<version>.zip, from the
+# Builds the download for a GitHub release, MD-Viewer.zip, from the
 # committed code (HEAD) rather than this folder, so files kept only in the
-# owner's copy, such as the Claude symbol (D-014), never ship. Prints the zip's
+# owner's copy, such as the Claude symbol (D-014), never ship. The name has no
+# version so the README can link to releases/latest/download/MD-Viewer.zip. Prints the zip's
 # SHA-256 for the release notes. Publishing it is a separate step (STATUS.md).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-$HOME/Library/Caches/md_html_reader}/release-zip"
-VERSION="${VERSION:-0.1.0}"
+VERSION="${VERSION:-0.1.1}"
 SOURCE="$BUILD_DIR/source"
 APP="$BUILD_DIR/dist/MD Viewer.app"
-ZIP="$BUILD_DIR/MD-Viewer-$VERSION.zip"
+ZIP="$BUILD_DIR/MD-Viewer.zip"
 
 if [[ -n "$(git -C "$ROOT" status --porcelain --untracked-files=no)" ]]; then
   echo "Commit your changes first: the zip is built from HEAD." >&2

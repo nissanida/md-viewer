@@ -6,7 +6,7 @@ CACHE   := $(HOME)/Library/Caches/md_html_reader
 APPS    ?= /Applications
 BINDIR  ?= $(shell brew --prefix 2>/dev/null || echo /usr/local)/bin
 ARCHS   ?= arm64 x86_64
-VERSION ?= 0.1.0
+VERSION ?= 0.1.1
 LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 .PHONY: help run app reveal install install-cli uninstall zip test test-swift test-web vendor icon clean

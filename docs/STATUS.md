@@ -1,5 +1,13 @@
 # Status
 
+**2026-11-03, waiting for the owner's go:** the README now leads with a
+one-line Terminal install, a Claude Code / Codex prompt, and the manual
+download (D-019), and closing a full-screen window no longer leaves a black
+screen. Committed locally as version 0.1.1; **not yet pushed or released**
+(a push, then release v0.1.1 with `MD-Viewer.zip`, then updating the v0.1.0
+notes). Until then GitHub still shows the old README. Then test the line on
+the second Mac.
+
 **As of 2026-10-24:** all features in the brief are built. Version 0.1.0 is
 installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
 It is public on GitHub, <https://github.com/nissanida/md-viewer>, with the
@@ -115,7 +123,8 @@ Public by the owner's choice: the full name in `LICENSE`, the handle
 
 **To publish a new version:**
 1. Raise `VERSION` in the `Makefile`, run `make test`, then commit and push.
-2. Run `make zip`. It builds `MD-Viewer-<version>.zip` from the committed code
+2. Run `make zip`. It builds `MD-Viewer.zip` (no version in the name, so the
+   README's line can use `releases/latest/download/`) from the committed code
    and prints its SHA-256.
 3. Publish it: `gh release create v<version> <zip> --target <commit> --title
    "MD Viewer <version>" --notes-file <notes>`. Copy the previous release's
@@ -136,6 +145,13 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-11-03:** fixed the black screen after closing the window in full
+  screen (it was hidden while full screen, which left an empty Space); added
+  `close-window`, `full-screen` and `window-state` to the automation hook;
+  tested a test copy: full screen, close, window hidden and out of full
+  screen. Rewrote the README's install section (Terminal line, assistant
+  prompt, clear manual steps) and kept one image (owner's request, D-019);
+  version 0.1.1.
 - **2026-11-03:** the README's Install section now offers only the download;
   the "Build it yourself" steps are gone (owner's request, D-018). The
   `mdviewer` command is linked from the installed app. Not yet pushed; the
