@@ -1,12 +1,12 @@
 # Status
 
-**2026-11-03, waiting for the owner's go:** the README now leads with a
-one-line Terminal install, a Claude Code / Codex prompt, and the manual
-download (D-019), and closing a full-screen window no longer leaves a black
-screen. Committed locally as version 0.1.1; **not yet pushed or released**
-(a push, then release v0.1.1 with `MD-Viewer.zip`, then updating the v0.1.0
-notes). Until then GitHub still shows the old README. Then test the line on
-the second Mac.
+**2026-11-03:** published version 0.1.1 (owner's go): release
+[v0.1.1](https://github.com/nissanida/md-viewer/releases/tag/v0.1.1) holds
+`MD-Viewer.zip` (SHA-256 `da9a00bb…cc6`, matches GitHub's copy). The README
+leads with a one-line Terminal install, a Claude Code / Codex prompt and the
+manual download (D-019); closing a full-screen window no longer leaves a black
+screen. **Next:** try the Terminal line on the second Mac and check that no
+warning appears.
 
 **As of 2026-10-24:** all features in the brief are built. Version 0.1.0 is
 installed in `/Applications`, and `mdviewer` is linked into `/opt/homebrew/bin`.
@@ -145,6 +145,8 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-11-03:** pushed and published v0.1.1 (owner's go); the v0.1.0 notes
+  now point to the README instead of the removed build section.
 - **2026-11-03:** fixed the black screen after closing the window in full
   screen (it was hidden while full screen, which left an empty Space); added
   `close-window`, `full-screen` and `window-state` to the automation hook;
