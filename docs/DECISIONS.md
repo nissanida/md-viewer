@@ -212,3 +212,18 @@ source only.
   as the Claude symbol (D-014), can't ship by accident. It stops if the symbol
   is in the app anyway, or if the app holds a path from the Mac that built it
   (that path includes the user name).
+
+## D-018 Download only: the build steps leave the README — 2026-11-03
+
+Replaces the "or build" half of D-017. The README's Install section now offers
+only the download (the zip on the latest release). Owner's call, after trying
+the install on another Mac and finding it did not go well.
+
+- **Why:** one path to support, and no need for Xcode tools or Terminal.
+- **What stays:** `make app`, `make install` and `make zip` still work for
+  development and are listed under "Development"; they are just no longer
+  presented as a way to install. The `mdviewer` command is now linked straight
+  from the installed app.
+- **Still open:** what exactly went wrong on the other Mac was not recorded.
+  The first-launch warning (the app isn't notarized, D-017) is the likeliest
+  cause; notarizing needs a paid Apple Developer account.

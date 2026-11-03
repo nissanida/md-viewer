@@ -11,8 +11,7 @@ second, and free and open source all the way down.
 
 ## Install
 
-MD Viewer runs on macOS 14 or later, on Apple Silicon and Intel Macs. Download
-the app, or build it yourself.
+MD Viewer runs on macOS 14 or later, on Apple Silicon and Intel Macs.
 
 ### Download the app
 
@@ -29,30 +28,15 @@ On macOS 14, right-clicking the app and choosing **Open** also works (macOS 15
 removed that shortcut). Or, in Terminal:
 `xattr -dr com.apple.quarantine "/Applications/MD Viewer.app"`.
 
-### Build it yourself
-
-An app you build on your own Mac opens without that warning. You need the
-Xcode Command Line Tools (`xcode-select --install`). Then:
-
-```bash
-git clone https://github.com/nissanida/md-viewer.git
-cd md-viewer
-make install
-```
-
-This builds the app for Apple Silicon and Intel, copies it to
-`/Applications/MD Viewer.app` and registers it with Finder. Run `make install`
-again after any change to rebuild and reinstall. To drag the app into
-Applications yourself instead, run `make app && make reveal`.
-
 Optional command-line helper (`mdviewer README.md`, `mdviewer docs/`, or just
-`mdviewer` for the current folder):
+`mdviewer` for the current folder), once the app is in Applications:
 
 ```bash
-make install-cli
+sudo ln -sf "/Applications/MD Viewer.app/Contents/Resources/mdviewer" /usr/local/bin/mdviewer
 ```
 
-`make uninstall` removes both.
+To uninstall, drag **MD Viewer** to the Trash and delete that link
+(`sudo rm /usr/local/bin/mdviewer`).
 
 ### Make it the default for markdown (or HTML)
 

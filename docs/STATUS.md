@@ -91,7 +91,8 @@ MIT license (Daniel Nissani). Release
 [v0.1.0](https://github.com/nissanida/md-viewer/releases/tag/v0.1.0) holds
 the download, `MD-Viewer-0.1.0.zip` (universal, 3.0 MB); GitHub's copy has
 the same SHA-256 as the one built here. The owner's choices: public, named
-`md-viewer`, MIT license, and both a download and build steps (D-017).
+`md-viewer`, MIT license, and a download plus build steps (D-017); since
+2026-11-03 the README offers the download only (D-018).
 
 **Everything pushed is public.** What keeps personal data out:
 - Commits here use GitHub's no-reply address, not the personal email (set in
@@ -135,6 +136,10 @@ syntax colors in the editor, tabs or multiple windows.
 
 ## Log
 
+- **2026-11-03:** the README's Install section now offers only the download;
+  the "Build it yourself" steps are gone (owner's request, D-018). The
+  `mdviewer` command is linked from the installed app. Not yet pushed; the
+  v0.1.0 release notes still link to the removed section.
 - **2026-10-24:** added two screenshots at the top of the README (owner's OK):
   a document in light mode with the sidebar, and the chat panel in dark mode
   (`docs/images/`). Taken from the public build in a test copy, with a sample
